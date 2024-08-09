@@ -1,0 +1,54 @@
+﻿using CodeFlows.Workspace.Common.Configuration;
+using CodeFlows.Workspace.Github.Workers;
+using ConductorSharp.Engine.Extensions;
+using ConductorSharp.Engine.Health;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+
+await Host.CreateDefaultBuilder(args)
+    .ConfigureServices(services =>
+    {
+        var builder = new ConfigurationBuilder()
+            .AddJsonFile($"appsettings.json", true, true)
+            .AddJsonFile($"appsettings.Development.json", true, true);
+
+        var configuration = builder.Build();
+
+        services.AddSingleton(
+            new StorageConfiguration()
+            {
+                RootDirectoryPath =
+                    configuration.GetValue<string>("Storage:RootDirectoryPath")
+                    ?? throw new InvalidOperationException(
+                        "Storage:RootDirectoryPath configuration value not set."
+                    )
+            }
+        );
+        services
+            .AddConductorSharp(
+                baseUrl: configuration.GetValue<string>("Conductor:BaseUrl")
+                    ?? throw new InvalidOperationException(
+                        "Conductor:BaseUrl configuration value not set."
+                    )
+            )
+            .AddExecutionManager(
+                maxConcurrentWorkers: configuration.GetValue("Conductor:MaxConcurrentWorkers", 10),
+                sleepInterval: configuration.GetValue("Conductor:SleepInterval", 500),
+                longPollInterval: configuration.GetValue("Conductor:LongPollInterval", 100),
+                domain: null,
+                typeof(Program).Assembly
+            )
+            .SetHealthCheckService<InMemoryHealthService>()
+            .AddPipelines(pipelines =>
+            {
+                pipelines.AddExecutionTaskTracking();
+                pipelines.AddContextLogging();
+                pipelines.AddRequestResponseLogging();
+                pipelines.AddValidation();
+            });
+
+        services.RegisterWorkerTask<CloneProject.Handler>();
+    })
+    .Build()
+    .RunAsync();
