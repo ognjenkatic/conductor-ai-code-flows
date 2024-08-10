@@ -1,4 +1,4 @@
-﻿namespace CodeFlows.Metrics.Chsarp.Common.Configuration;
+﻿namespace Codeflows.Metrics.Csharp.Common.Configuration;
 
 public static class StorageConfiguration
 {
