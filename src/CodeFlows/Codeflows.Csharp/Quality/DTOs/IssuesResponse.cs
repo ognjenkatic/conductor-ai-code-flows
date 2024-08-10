@@ -14,7 +14,7 @@ namespace Codeflows.Csharp.Quality.DTOs
         public int? Ps { get; set; }
 
         [JsonPropertyName("paging")]
-        public Paging Paging { get; set; }
+        public required Paging Paging { get; set; }
 
         [JsonPropertyName("effortTotal")]
         public int? EffortTotal { get; set; }

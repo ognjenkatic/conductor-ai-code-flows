@@ -6,6 +6,10 @@ WORKDIR /app
 
 RUN mkdir /app/my-repos
 RUN mkdir /app/global-repos
+RUN mkdir /app/tools
+
+RUN dotnet tool install dotnet-sonarscanner --tool-path /app/tools
+ENV PATH=$PATH:/app/tools
 
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 ARG BUILD_CONFIGURATION=Release

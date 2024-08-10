@@ -1,4 +1,5 @@
-﻿using Codeflows.Csharp.Quality.Services;
+﻿using Codeflows.Csharp.Common.Configuration;
+using Codeflows.Csharp.Quality.Services;
 using Codeflows.Csharp.Quality.Workers;
 using ConductorSharp.Engine.Extensions;
 using ConductorSharp.Engine.Health;
@@ -28,20 +29,23 @@ await Host.CreateDefaultBuilder(args)
             builder.AddSerilog(logger);
         });
 
+        var sonarqubePat =
+            configuration.GetValue<string>("Sonarqube:Token")
+            ?? throw new InvalidOperationException("Sonarqube:Token configuration value not set.");
+
+        var sonarqubeBaseUrl =
+            configuration.GetValue<string>("Sonarqube:BaseUrl")
+            ?? throw new InvalidOperationException(
+                "Sonarqube:BaseUrl configuration value not set."
+            );
+
+        services.AddSingleton(
+            new SonarqubeConfiguration { Token = sonarqubePat, BaseUrl = sonarqubeBaseUrl }
+        );
+
         services.AddHttpClient<SonarqubeService>(opts =>
         {
-            var sonarqubePat =
-                configuration.GetValue<string>("Sonarqube:Token")
-                ?? throw new InvalidOperationException(
-                    "Sonarqube:Token configuration value not set."
-                );
-
-            opts.BaseAddress = new Uri(
-                configuration.GetValue<string>("Sonarqube:BaseUrl")
-                    ?? throw new InvalidOperationException(
-                        "Sonarqube:BaseUrl configuration value not set."
-                    )
-            );
+            opts.BaseAddress = new Uri(sonarqubeBaseUrl);
 
             opts.DefaultRequestHeaders.Add("Authorization", $"Bearer {sonarqubePat}");
         });
@@ -71,6 +75,8 @@ await Host.CreateDefaultBuilder(args)
 
         services.RegisterWorkerTask<GetProjectFileLocations.Handler>();
         services.RegisterWorkerTask<GetCodeMetrics.Handler>();
+        services.RegisterWorkerTask<AnalyseCode.Handler>();
+        services.RegisterWorkerTask<InitMetricsProject.Handler>();
     })
     .Build()
     .RunAsync();

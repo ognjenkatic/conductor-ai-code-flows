@@ -13,6 +13,9 @@ namespace Codeflows.Csharp.Quality.Workers
         [Required]
         public required string RepositoryPath { get; set; }
 
+        [Required]
+        public required string ProjectId { get; set; }
+
         public record Response(Dictionary<string, List<CodeFlowIssue>> IssuesByFile);
 
         [OriginalName("cq_get_metrics")]
@@ -36,7 +39,7 @@ namespace Codeflows.Csharp.Quality.Workers
                 while (shouldLoadMore)
                 {
                     var queryResponse = await sonarqubeService.GetIssues(
-                        "test-project",
+                        request.ProjectId,
                         currentPage,
                         pageSize,
                         cancellationToken

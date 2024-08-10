@@ -4,6 +4,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using CodeFlows.Workspace.Common.Configuration;
 using CodeFlows.Workspace.Common.Util;
@@ -13,19 +14,21 @@ using MediatR;
 
 namespace CodeFlows.Workspace.Github.Workers
 {
-    public record CloneProject : IRequest<CloneProject.Response>
+    public partial record CloneProject : IRequest<CloneProject.Response>
     {
         [Required]
+        [Url]
         public required string RepositoryUrl { get; set; }
 
         public record Response(
             string RepositoryPath,
             int NumberOfFilesInRepository,
-            long SizeOfRepositoryInBytes
+            long SizeOfRepositoryInBytes,
+            string RepositoryName
         );
 
         [OriginalName("gh_clone_repo")]
-        public class Handler() : TaskRequestHandler<CloneProject, Response>
+        public partial class Handler() : TaskRequestHandler<CloneProject, Response>
         {
             public override async Task<Response> Handle(
                 CloneProject request,
@@ -70,12 +73,23 @@ namespace CodeFlows.Workspace.Github.Workers
                     directoryInfo.FullName
                 );
 
+                var repositoryName = request.RepositoryUrl.Split("/").Last();
+
+                if (!RepositoryNameRegex().IsMatch(repositoryName))
+                {
+                    throw new InvalidOperationException("Invalid repository name");
+                }
+
                 return new Response(
                     directoryName,
                     repositoryMetadata.NumberOfFiles,
-                    repositoryMetadata.SizeInBytes
+                    repositoryMetadata.SizeInBytes,
+                    repositoryName
                 );
             }
+
+            [GeneratedRegex(@"[A-z0-9_-]+")]
+            private static partial Regex RepositoryNameRegex();
         }
     }
 }
