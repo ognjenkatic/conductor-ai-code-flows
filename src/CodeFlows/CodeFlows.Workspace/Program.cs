@@ -28,16 +28,6 @@ await Host.CreateDefaultBuilder(args)
             builder.AddSerilog(logger);
         });
 
-        services.AddSingleton(
-            new StorageConfiguration()
-            {
-                RootDirectoryPath =
-                    configuration.GetValue<string>("Storage:RootDirectoryPath")
-                    ?? throw new InvalidOperationException(
-                        "Storage:RootDirectoryPath configuration value not set."
-                    )
-            }
-        );
         services
             .AddConductorSharp(
                 baseUrl: configuration.GetValue<string>("Conductor:BaseUrl")

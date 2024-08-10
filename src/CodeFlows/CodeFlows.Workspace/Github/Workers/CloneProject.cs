@@ -25,11 +25,8 @@ namespace CodeFlows.Workspace.Github.Workers
         );
 
         [OriginalName("gh_clone_repo")]
-        public class Handler(StorageConfiguration storageConfiguration)
-            : TaskRequestHandler<CloneProject, Response>
+        public class Handler() : TaskRequestHandler<CloneProject, Response>
         {
-            private readonly StorageConfiguration storageConfiguration = storageConfiguration;
-
             public override async Task<Response> Handle(
                 CloneProject request,
                 CancellationToken cancellationToken
@@ -38,7 +35,7 @@ namespace CodeFlows.Workspace.Github.Workers
                 var directoryName = StringUtils.GetRandomString(32);
 
                 var directoryInfo = new DirectoryInfo(
-                    Path.Join(storageConfiguration.RootDirectoryPath, directoryName)
+                    Path.Join(StorageConfiguration.RootDirectoryPath, directoryName)
                 );
 
                 if (directoryInfo.Exists)

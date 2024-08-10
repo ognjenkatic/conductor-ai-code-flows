@@ -1,6 +1,6 @@
 ﻿namespace CodeFlows.Workspace.Common.Configuration;
 
-public class StorageConfiguration
+public static class StorageConfiguration
 {
-    public required string RootDirectoryPath { get; set; }
+    public const string RootDirectoryPath = "app/repos";
 }
