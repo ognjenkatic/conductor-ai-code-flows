@@ -9,7 +9,7 @@ RUN apt install gh
 USER app
 WORKDIR /app
 
-RUN mkdir repos
+RUN mkdir /app/repos
 
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 ARG BUILD_CONFIGURATION=Release

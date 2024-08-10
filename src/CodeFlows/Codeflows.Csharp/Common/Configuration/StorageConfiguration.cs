@@ -2,5 +2,6 @@
 
 public static class StorageConfiguration
 {
-    public const string RootDirectoryPath = "app/repos";
+    public const string GlobalRootDirectoryPath = "/app/global-repos";
+    public const string MyRootDirectoryPath = "/app/my-repos";
 }

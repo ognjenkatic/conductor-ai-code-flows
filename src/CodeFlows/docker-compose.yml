@@ -6,3 +6,10 @@ services:
     build:
       context: .
       dockerfile: CodeFlows.Workspace/Dockerfile
+
+  codeflows.csharp:
+    image: ${DOCKER_REGISTRY-}codeflowscsharp
+    build:
+      context: .
+      dockerfile: Codeflows.Csharp/Dockerfile
+

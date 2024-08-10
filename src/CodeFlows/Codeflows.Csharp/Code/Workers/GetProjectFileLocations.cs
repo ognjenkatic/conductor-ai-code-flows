@@ -5,6 +5,7 @@ using Codeflows.Csharp.Common.Util;
 using ConductorSharp.Engine;
 using ConductorSharp.Engine.Builders.Metadata;
 using MediatR;
+using Microsoft.VisualBasic.FileIO;
 
 namespace Codeflows.Csharp.Quality.Workers
 {
@@ -23,17 +24,33 @@ namespace Codeflows.Csharp.Quality.Workers
                 CancellationToken cancellationToken
             )
             {
-                var directoryInfo = new DirectoryInfo(
-                    Path.Join(StorageConfiguration.RootDirectoryPath, request.RepositoryPath)
+                var globalRepoDirectoryInfo = new DirectoryInfo(
+                    Path.Join(StorageConfiguration.GlobalRootDirectoryPath, request.RepositoryPath)
                 );
 
-                if (!directoryInfo.Exists)
+                if (!globalRepoDirectoryInfo.Exists)
                 {
-                    throw new InvalidOperationException("No directory exists at specified path");
+                    throw new InvalidOperationException(
+                        "No directory exists at specified global repository path"
+                    );
                 }
 
+                var myRepoDirectoryPath = Path.Join(
+                    StorageConfiguration.MyRootDirectoryPath,
+                    StringUtils.GetRandomString(32)
+                );
+
+                if (Path.Exists(myRepoDirectoryPath))
+                {
+                    throw new InvalidOperationException(
+                        $"Oops, somehow the destination directory already exists"
+                    );
+                }
+
+                FileSystem.CopyDirectory(globalRepoDirectoryInfo.FullName, myRepoDirectoryPath);
+
                 var csprojPaths = DirectoryUtils.GetMatchingDirectoryFilePaths(
-                    request.RepositoryPath,
+                    myRepoDirectoryPath,
                     CsProjectRegex()
                 );
 

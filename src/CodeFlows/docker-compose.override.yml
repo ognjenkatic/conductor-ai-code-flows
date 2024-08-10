@@ -5,9 +5,15 @@ services:
     env_file: "Dockerfile.env"
     volumes:
       - repository-volume:/app/repos
-    
+
+  codeflows.csharp:
+    image: ${DOCKER_REGISTRY-}codeflowscsharp
+    volumes:
+      - repository-volume:/app/global-repos
+      - csharp-repository-volume:/app/my-repos
+
 volumes:
   repository-volume:
     driver: local  
-  csharp-volume:
+  csharp-repository-volume:
     driver: local

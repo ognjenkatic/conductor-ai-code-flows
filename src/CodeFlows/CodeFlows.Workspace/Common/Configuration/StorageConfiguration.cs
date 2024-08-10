@@ -2,5 +2,5 @@
 
 public static class StorageConfiguration
 {
-    public const string RootDirectoryPath = "app/repos";
+    public const string RootDirectoryPath = "/app/repos";
 }
