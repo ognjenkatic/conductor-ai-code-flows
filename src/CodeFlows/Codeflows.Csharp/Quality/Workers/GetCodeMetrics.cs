@@ -44,24 +44,27 @@ namespace Codeflows.Csharp.Quality.Workers
 
                     queryResponse.Issues.ForEach(issue =>
                     {
-#pragma warning disable CA1854 // Prefer the 'IDictionary.TryGetValue(TKey, out TValue)' method
-                        if (!codeFlowIssues.ContainsKey(issue.Component))
+                        if (
+                            !codeFlowIssues.TryGetValue(
+                                issue.Component,
+                                out List<CodeFlowIssue>? value
+                            )
+                        )
                         {
-                            codeFlowIssues.Add(issue.Component, []);
+                            value = ([]);
+                            codeFlowIssues.Add(issue.Component, value);
                         }
-#pragma warning restore CA1854 // Prefer the 'IDictionary.TryGetValue(TKey, out TValue)' method
 
-                        codeFlowIssues[issue.Component]
-                            .Add(
-                                new CodeFlowIssue()
-                                {
-                                    Message = issue.Message,
-                                    StartLine = issue.TextRange.StartLine,
-                                    EndLine = issue.TextRange.EndLine,
-                                    StartPos = issue.TextRange.StartOffset,
-                                    EndPos = issue.TextRange.EndOffset
-                                }
-                            );
+                        value.Add(
+                            new CodeFlowIssue()
+                            {
+                                Message = issue.Message,
+                                StartLine = issue.TextRange.StartLine,
+                                EndLine = issue.TextRange.EndLine,
+                                StartPos = issue.TextRange.StartOffset,
+                                EndPos = issue.TextRange.EndOffset
+                            }
+                        );
                     });
 
                     issuesLoaded += queryResponse.Issues.Count;
