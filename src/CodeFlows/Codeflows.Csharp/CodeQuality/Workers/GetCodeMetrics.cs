@@ -3,7 +3,7 @@ using ConductorSharp.Engine;
 using ConductorSharp.Engine.Builders.Metadata;
 using MediatR;
 
-namespace Codeflows.Metrics.Csharp.CodeQuality.Workers
+namespace Codeflows.Csharp.CodeQuality.Workers
 {
     public record GetCodeMetrics : IRequest<GetCodeMetrics.Response>
     {

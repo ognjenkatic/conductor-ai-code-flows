@@ -7,9 +7,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CodeFlows.Workspace", "Code
 EndProject
 Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker-compose.dcproj", "{A9D4128A-5A77-4961-9FBE-1FB5E3B8A52A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Codeflows.Metrics.Csharp", "Codeflows.Metrics.Csharp\Codeflows.Metrics.Csharp.csproj", "{94E1F1AB-5908-4851-AD6B-DEF070CBEF7A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CodeFlows.GenAi", "CodeFlows.GenAi\CodeFlows.GenAi.csproj", "{A582152C-12B4-42C5-95AA-33533ADDCC2D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CodeFlows.GenAi", "CodeFlows.GenAi\CodeFlows.GenAi.csproj", "{A582152C-12B4-42C5-95AA-33533ADDCC2D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Codeflows.Csharp", "Codeflows.Csharp\Codeflows.Csharp.csproj", "{435FB3BE-2090-41CA-AC72-CB1F88395D60}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -25,14 +25,14 @@ Global
 		{A9D4128A-5A77-4961-9FBE-1FB5E3B8A52A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A9D4128A-5A77-4961-9FBE-1FB5E3B8A52A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A9D4128A-5A77-4961-9FBE-1FB5E3B8A52A}.Release|Any CPU.Build.0 = Release|Any CPU
-		{94E1F1AB-5908-4851-AD6B-DEF070CBEF7A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{94E1F1AB-5908-4851-AD6B-DEF070CBEF7A}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{94E1F1AB-5908-4851-AD6B-DEF070CBEF7A}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{94E1F1AB-5908-4851-AD6B-DEF070CBEF7A}.Release|Any CPU.Build.0 = Release|Any CPU
 		{A582152C-12B4-42C5-95AA-33533ADDCC2D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{A582152C-12B4-42C5-95AA-33533ADDCC2D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A582152C-12B4-42C5-95AA-33533ADDCC2D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A582152C-12B4-42C5-95AA-33533ADDCC2D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{435FB3BE-2090-41CA-AC72-CB1F88395D60}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{435FB3BE-2090-41CA-AC72-CB1F88395D60}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{435FB3BE-2090-41CA-AC72-CB1F88395D60}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{435FB3BE-2090-41CA-AC72-CB1F88395D60}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

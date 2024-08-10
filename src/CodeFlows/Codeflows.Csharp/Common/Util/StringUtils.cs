@@ -1,4 +1,4 @@
-﻿namespace Codeflows.Metrics.Csharp.Common.Util;
+﻿namespace Codeflows.Csharp.Common.Util;
 
 public static class StringUtils
 {
