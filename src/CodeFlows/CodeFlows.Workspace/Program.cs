@@ -5,6 +5,8 @@ using ConductorSharp.Engine.Health;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
+using Serilog;
 
 await Host.CreateDefaultBuilder(args)
     .ConfigureServices(services =>
@@ -13,7 +15,17 @@ await Host.CreateDefaultBuilder(args)
             .AddJsonFile($"appsettings.json", true, true)
             .AddJsonFile($"appsettings.Development.json", true, true);
 
+        var logger = new LoggerConfiguration()
+            .ReadFrom.Configuration(builder.Build())
+            .CreateLogger();
+
         var configuration = builder.Build();
+
+        services.AddLogging(builder =>
+        {
+            builder.ClearProviders();
+            builder.AddSerilog(logger);
+        });
 
         services.AddSingleton(
             new StorageConfiguration()
