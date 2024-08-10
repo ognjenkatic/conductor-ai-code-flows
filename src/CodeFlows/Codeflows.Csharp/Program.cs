@@ -1,4 +1,5 @@
-﻿using ConductorSharp.Engine.Extensions;
+﻿using Codeflows.Csharp.Quality.Workers;
+using ConductorSharp.Engine.Extensions;
 using ConductorSharp.Engine.Health;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -48,6 +49,8 @@ await Host.CreateDefaultBuilder(args)
                 pipelines.AddRequestResponseLogging();
                 pipelines.AddValidation();
             });
+
+        services.RegisterWorkerTask<GetProjectFileLocations.Handler>();
     })
     .Build()
     .RunAsync();
