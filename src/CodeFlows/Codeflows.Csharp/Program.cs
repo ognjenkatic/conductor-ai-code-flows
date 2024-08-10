@@ -1,4 +1,5 @@
-﻿using Codeflows.Csharp.Quality.Workers;
+﻿using Codeflows.Csharp.Quality.Services;
+using Codeflows.Csharp.Quality.Workers;
 using ConductorSharp.Engine.Extensions;
 using ConductorSharp.Engine.Health;
 using Microsoft.Extensions.Configuration;
@@ -27,6 +28,24 @@ await Host.CreateDefaultBuilder(args)
             builder.AddSerilog(logger);
         });
 
+        services.AddHttpClient<SonarqubeService>(opts =>
+        {
+            var sonarqubePat =
+                configuration.GetValue<string>("Sonarqube:Token")
+                ?? throw new InvalidOperationException(
+                    "Sonarqube:Token configuration value not set."
+                );
+
+            opts.BaseAddress = new Uri(
+                configuration.GetValue<string>("Sonarqube:BaseUrl")
+                    ?? throw new InvalidOperationException(
+                        "Sonarqube:BaseUrl configuration value not set."
+                    )
+            );
+
+            opts.DefaultRequestHeaders.Add("Authorization", $"Bearer {sonarqubePat}");
+        });
+
         services
             .AddConductorSharp(
                 baseUrl: configuration.GetValue<string>("Conductor:BaseUrl")
@@ -51,6 +70,7 @@ await Host.CreateDefaultBuilder(args)
             });
 
         services.RegisterWorkerTask<GetProjectFileLocations.Handler>();
+        services.RegisterWorkerTask<GetCodeMetrics.Handler>();
     })
     .Build()
     .RunAsync();

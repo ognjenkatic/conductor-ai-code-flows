@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using Codeflows.Csharp.Quality.Services;
 using ConductorSharp.Engine;
 using ConductorSharp.Engine.Builders.Metadata;
 using MediatR;
@@ -13,13 +14,18 @@ namespace Codeflows.Csharp.Quality.Workers
         public record Response();
 
         [OriginalName("cq_get_metrics")]
-        public class Handler() : TaskRequestHandler<GetCodeMetrics, Response>
+        public class Handler(SonarqubeService sonarqubeService)
+            : TaskRequestHandler<GetCodeMetrics, Response>
         {
-            public override Task<Response> Handle(
+            private readonly SonarqubeService sonarqubeService = sonarqubeService;
+
+            public override async Task<Response> Handle(
                 GetCodeMetrics request,
                 CancellationToken cancellationToken
             )
             {
+                var issues = await sonarqubeService.GetIssues("test-project", cancellationToken);
+
                 throw new NotImplementedException();
             }
         }
