@@ -9,6 +9,8 @@ Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker-co
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Codeflows.Metrics.Csharp", "Codeflows.Metrics.Csharp\Codeflows.Metrics.Csharp.csproj", "{94E1F1AB-5908-4851-AD6B-DEF070CBEF7A}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CodeFlows.GenAi", "CodeFlows.GenAi\CodeFlows.GenAi.csproj", "{A582152C-12B4-42C5-95AA-33533ADDCC2D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +29,10 @@ Global
 		{94E1F1AB-5908-4851-AD6B-DEF070CBEF7A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{94E1F1AB-5908-4851-AD6B-DEF070CBEF7A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{94E1F1AB-5908-4851-AD6B-DEF070CBEF7A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A582152C-12B4-42C5-95AA-33533ADDCC2D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A582152C-12B4-42C5-95AA-33533ADDCC2D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A582152C-12B4-42C5-95AA-33533ADDCC2D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A582152C-12B4-42C5-95AA-33533ADDCC2D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
