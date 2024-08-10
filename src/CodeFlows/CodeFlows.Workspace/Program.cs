@@ -12,6 +12,7 @@ await Host.CreateDefaultBuilder(args)
     .ConfigureServices(services =>
     {
         var builder = new ConfigurationBuilder()
+            .AddEnvironmentVariables()
             .AddJsonFile($"appsettings.json", true, true)
             .AddJsonFile($"appsettings.Development.json", true, true);
 
