@@ -9,20 +9,18 @@ namespace Codeflows.Csharp.Quality.Services
 
         public async Task<IssuesResponse> GetIssues(
             string componentId,
+            int pageNumber,
+            int pageSize = 100,
             CancellationToken cancellationToken = default
         )
         {
             ArgumentException.ThrowIfNullOrEmpty(componentId);
 
-            var resp = await httpClient.GetAsync(
-                $"api/issues/search?components={componentId}",
-                cancellationToken
-            );
-
-            var respstr = await resp.Content.ReadAsStringAsync();
+            pageNumber = Math.Max(pageNumber, 1);
+            pageSize = Math.Min(Math.Max(pageSize, 1), 100);
 
             return await httpClient.GetFromJsonAsync<IssuesResponse>(
-                    $"api/issues/search?components={componentId}",
+                    $"api/issues/search?components={componentId}&p={pageNumber}&ps={pageSize}",
                     cancellationToken
                 ) ?? throw new InvalidOperationException("Could not fetch issues");
         }

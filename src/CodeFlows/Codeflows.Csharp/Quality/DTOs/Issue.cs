@@ -26,7 +26,7 @@ namespace Codeflows.Csharp.Quality.DTOs
         public required string Hash { get; set; }
 
         [JsonPropertyName("textRange")]
-        public TextRange? TextRange { get; set; }
+        public required TextRange TextRange { get; set; }
 
         [JsonPropertyName("flows")]
         public List<Flow> Flows { get; set; } = [];
