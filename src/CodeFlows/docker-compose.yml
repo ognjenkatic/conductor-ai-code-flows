@@ -1,0 +1,8 @@
+version: '3.4'
+
+services:
+  codeflows.workspace:
+    image: ${DOCKER_REGISTRY-}codeflowsworkspace
+    build:
+      context: .
+      dockerfile: CodeFlows.Workspace/Dockerfile

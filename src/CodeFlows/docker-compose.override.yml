@@ -1,0 +1,11 @@
+version: '3.4'
+
+services:
+  codeflows.workspace:
+    env_file: "Dockerfile.env"
+    volumes:
+      - repository-volume:/app/repos
+    
+volumes:
+  repository-volume:
+    driver: local  

@@ -3,10 +3,13 @@
 FROM mcr.microsoft.com/dotnet/runtime:8.0 AS base
 
 RUN apt update
+RUN apt install git -y
 RUN apt install gh
 
 USER app
 WORKDIR /app
+
+RUN mkdir repos
 
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 ARG BUILD_CONFIGURATION=Release
