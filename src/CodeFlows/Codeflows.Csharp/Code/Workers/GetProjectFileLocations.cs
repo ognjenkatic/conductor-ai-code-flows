@@ -57,7 +57,7 @@ namespace Codeflows.Csharp.Quality.Workers
                 return Task.FromResult(new Response(csprojPaths));
             }
 
-            [GeneratedRegex(".+\\.csproj")]
+            [GeneratedRegex(".+\\.sln")]
             private static partial Regex CsProjectRegex();
         }
     }

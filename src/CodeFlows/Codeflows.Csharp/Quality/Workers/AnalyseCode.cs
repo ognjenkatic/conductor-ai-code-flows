@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.Diagnostics;
 using Codeflows.Csharp.Common.Configuration;
+using Codeflows.Csharp.Quality.DTOs;
 using ConductorSharp.Engine;
 using ConductorSharp.Engine.Builders.Metadata;
 using MediatR;
@@ -35,37 +36,44 @@ namespace Codeflows.Csharp.Quality.Workers
                     return new Response();
                 }
 
+                var projectFileInfos = request
+                    .ProjectFilePaths.Select(p => new FileInfo(p))
+                    .ToList();
+
                 // Make sure all projects build before doing anything
-                foreach (var projectPath in request.ProjectFilePaths)
+                foreach (var projectPath in projectFileInfos)
                 {
-                    var process = new Process
-                    {
-                        StartInfo = new ProcessStartInfo()
-                        {
-                            FileName = "dotnet",
-                            Arguments = $"build {projectPath}"
-                        }
-                    };
-                    process.Start();
-                    await process.WaitForExitAsync(cancellationToken);
+                    await RunCommand(
+                        "dotnet",
+                        $"build {projectPath.Name}",
+                        projectPath.Directory!.FullName,
+                        cancellationToken
+                    );
                 }
 
-                await RunCommand(
-                    "dotnet",
-                    $"sonarscanner begin /k:\"{request.ProjectId}\" /d:sonar.host.url=\"{sonarqubeConfiguration.BaseUrl}\"  /d:sonar.token=\"{sonarqubeConfiguration.Token}\"",
-                    cancellationToken
-                );
-
-                foreach (var projectPath in request.ProjectFilePaths)
+                foreach (var projectPath in projectFileInfos)
                 {
-                    await RunCommand("dotnet", $"build {projectPath}", cancellationToken);
-                }
+                    await RunCommand(
+                        "dotnet",
+                        $"sonarscanner begin /k:\"{request.ProjectId}\" /d:sonar.host.url=\"{sonarqubeConfiguration.BaseUrl}\"  /d:sonar.token=\"{sonarqubeConfiguration.Token}\"",
+                        projectPath.Directory!.FullName,
+                        cancellationToken
+                    );
 
-                await RunCommand(
-                    "dotnet",
-                    $"dotnet sonarscanner end /d:sonar.token=\"{sonarqubeConfiguration.Token}\"",
-                    cancellationToken
-                );
+                    await RunCommand(
+                        "dotnet",
+                        $"build {projectPath.Name}",
+                        projectPath.Directory!.FullName,
+                        cancellationToken
+                    );
+
+                    await RunCommand(
+                        "dotnet",
+                        $"dotnet sonarscanner end /d:sonar.token=\"{sonarqubeConfiguration.Token}\"",
+                        projectPath.Directory!.FullName,
+                        cancellationToken
+                    );
+                }
 
                 return new Response();
             }
@@ -73,12 +81,18 @@ namespace Codeflows.Csharp.Quality.Workers
             private static async Task RunCommand(
                 string command,
                 string arguments,
+                string workingDirectory,
                 CancellationToken cancellationToken = default
             )
             {
                 var process = new Process
                 {
-                    StartInfo = new ProcessStartInfo() { FileName = command, Arguments = arguments }
+                    StartInfo = new ProcessStartInfo()
+                    {
+                        FileName = command,
+                        Arguments = arguments,
+                        WorkingDirectory = workingDirectory
+                    }
                 };
                 process.Start();
                 await process.WaitForExitAsync(cancellationToken);

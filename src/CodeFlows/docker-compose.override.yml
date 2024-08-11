@@ -11,6 +11,8 @@ services:
     volumes:
       - repository-volume:/app/global-repos
       - csharp-repository-volume:/app/my-repos
+      - csharp-tools-volume:/app/tools
+
   sonarqube:
     image: sonarqube:community
     depends_on:
@@ -23,6 +25,7 @@ services:
       - sonarqube_data:/opt/sonarqube/data
       - sonarqube_extensions:/opt/sonarqube/extensions
       - sonarqube_logs:/opt/sonarqube/logs
+
     ports:
       - "9000:9000"
   db:
@@ -34,6 +37,7 @@ services:
       - postgresql:/var/lib/postgresql
       - postgresql_data:/var/lib/postgresql/data
 volumes:
+  csharp-tools-volume:
   repository-volume:
     driver: local  
   csharp-repository-volume:
