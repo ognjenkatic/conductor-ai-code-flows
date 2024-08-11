@@ -1,9 +1,11 @@
-﻿using ConductorSharp.Engine.Extensions;
+﻿using CodeFlows.GenAi.OpenAi.Workers;
+using ConductorSharp.Engine.Extensions;
 using ConductorSharp.Engine.Health;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using OpenAI_API;
 using Serilog;
 
 await Host.CreateDefaultBuilder(args)
@@ -24,6 +26,16 @@ await Host.CreateDefaultBuilder(args)
         {
             builder.ClearProviders();
             builder.AddSerilog(logger);
+        });
+
+        services.AddScoped(ctx =>
+        {
+            var openAiApiKey =
+                configuration.GetValue<string>("OpenAi:ApiKey")
+                ?? throw new InvalidOperationException(
+                    "OpenAi:ApiKey configuration value not set."
+                );
+            return new OpenAIAPI(new APIAuthentication(openAiApiKey));
         });
 
         services
@@ -48,6 +60,8 @@ await Host.CreateDefaultBuilder(args)
                 pipelines.AddRequestResponseLogging();
                 pipelines.AddValidation();
             });
+
+        services.RegisterWorkerTask<RefactorProject.Handler>();
     })
     .Build()
     .RunAsync();

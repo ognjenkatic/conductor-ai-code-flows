@@ -5,7 +5,8 @@
       "commandVersion": "1.0",
       "serviceActions": {
         "codeflows.workspace": "StartDebugging",
-        "codeflows.csharp": "StartDebugging"
+        "codeflows.csharp": "StartDebugging",
+        "codeflows.genai": "StartDebugging"
       }
     }
   }

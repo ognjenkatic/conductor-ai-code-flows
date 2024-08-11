@@ -11,9 +11,6 @@ namespace Codeflows.Csharp.Quality.Workers
     public record GetCodeMetrics : IRequest<GetCodeMetrics.Response>
     {
         [Required]
-        public required string RepositoryPath { get; set; }
-
-        [Required]
         public required string ProjectId { get; set; }
 
         public record Response(Dictionary<string, List<CodeFlowIssue>> IssuesByFile);

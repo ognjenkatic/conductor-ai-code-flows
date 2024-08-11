@@ -13,6 +13,11 @@ services:
       - csharp-repository-volume:/app/my-repos
       - csharp-tools-volume:/app/tools
 
+  codeflows.genai:
+    image: ${DOCKER_REGISTRY-}codeflowsgenai
+    volumes:
+      - csharp-repository-volume:/app/my-repos
+
   sonarqube:
     image: sonarqube:community
     depends_on:
