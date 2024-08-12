@@ -15,7 +15,7 @@ namespace CodeFlows.GenAi.OpenAi.Workers
     {
         [Required]
         [MinLength(1)]
-        public required List<string> ProjectFilePaths { get; set; }
+        public required string ProjectFilePath { get; set; }
 
         [Required]
         public required Dictionary<string, List<CodeFlowIssue>> IssuesByFile { get; set; }
@@ -53,14 +53,7 @@ namespace CodeFlows.GenAi.OpenAi.Workers
                     return new Response() { RefactoredFiles = new() };
                 }
 
-                if (request.ProjectFilePaths.Count != 1)
-                {
-                    throw new InvalidCastException(
-                        "Currently multiple project paths are not supported, only 1"
-                    );
-                }
-
-                var projectDir = new FileInfo(request.ProjectFilePaths[0]).Directory!.FullName;
+                var projectDir = new FileInfo(request.ProjectFilePath).Directory!.FullName;
 
                 var processedPrompts = 0;
 

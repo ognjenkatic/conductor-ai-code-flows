@@ -61,7 +61,10 @@ await Host.CreateDefaultBuilder(args)
                 pipelines.AddValidation();
             });
 
-        services.RegisterWorkerTask<RefactorProject.Handler>();
+        services.RegisterWorkerTask<RefactorProject.Handler>(opts =>
+        {
+            opts.TimeoutSeconds = opts.ResponseTimeoutSeconds = 600;
+        });
     })
     .Build()
     .RunAsync();

@@ -11,7 +11,8 @@ namespace Codeflows.Csharp.Quality.Workers
     public record AnalyseCode : IRequest<AnalyseCode.Response>
     {
         [Required]
-        public required List<string> ProjectFilePaths { get; set; }
+        [MinLength(1)]
+        public required string ProjectFilePath { get; set; }
 
         [Required]
         public required string ProjectId { get; set; }
@@ -31,49 +32,35 @@ namespace Codeflows.Csharp.Quality.Workers
             {
                 ArgumentException.ThrowIfNullOrEmpty(request.ProjectId);
 
-                if (request.ProjectFilePaths.Count == 0)
-                {
-                    return new Response();
-                }
+                var projectFileInfo = new FileInfo(request.ProjectFilePath);
 
-                var projectFileInfos = request
-                    .ProjectFilePaths.Select(p => new FileInfo(p))
-                    .ToList();
+                await RunCommand(
+                    "dotnet",
+                    $"build {projectFileInfo.Name}",
+                    projectFileInfo.Directory!.FullName,
+                    cancellationToken
+                );
 
-                // Make sure all projects build before doing anything
-                foreach (var projectPath in projectFileInfos)
-                {
-                    await RunCommand(
-                        "dotnet",
-                        $"build {projectPath.Name}",
-                        projectPath.Directory!.FullName,
-                        cancellationToken
-                    );
-                }
+                await RunCommand(
+                    "dotnet",
+                    $"sonarscanner begin /k:\"{request.ProjectId}\" /d:sonar.host.url=\"{sonarqubeConfiguration.BaseUrl}\"  /d:sonar.token=\"{sonarqubeConfiguration.Token}\"",
+                    projectFileInfo.Directory!.FullName,
+                    cancellationToken
+                );
 
-                foreach (var projectPath in projectFileInfos)
-                {
-                    await RunCommand(
-                        "dotnet",
-                        $"sonarscanner begin /k:\"{request.ProjectId}\" /d:sonar.host.url=\"{sonarqubeConfiguration.BaseUrl}\"  /d:sonar.token=\"{sonarqubeConfiguration.Token}\"",
-                        projectPath.Directory!.FullName,
-                        cancellationToken
-                    );
+                await RunCommand(
+                    "dotnet",
+                    $"build {projectFileInfo.Name}",
+                    projectFileInfo.Directory!.FullName,
+                    cancellationToken
+                );
 
-                    await RunCommand(
-                        "dotnet",
-                        $"build {projectPath.Name}",
-                        projectPath.Directory!.FullName,
-                        cancellationToken
-                    );
-
-                    await RunCommand(
-                        "dotnet",
-                        $"dotnet sonarscanner end /d:sonar.token=\"{sonarqubeConfiguration.Token}\"",
-                        projectPath.Directory!.FullName,
-                        cancellationToken
-                    );
-                }
+                await RunCommand(
+                    "dotnet",
+                    $"dotnet sonarscanner end /d:sonar.token=\"{sonarqubeConfiguration.Token}\"",
+                    projectFileInfo.Directory!.FullName,
+                    cancellationToken
+                );
 
                 return new Response();
             }
@@ -96,6 +83,11 @@ namespace Codeflows.Csharp.Quality.Workers
                 };
                 process.Start();
                 await process.WaitForExitAsync(cancellationToken);
+
+                if (process.ExitCode != 0)
+                {
+                    throw new InvalidOperationException($"Command {command} returned error");
+                }
             }
         }
     }

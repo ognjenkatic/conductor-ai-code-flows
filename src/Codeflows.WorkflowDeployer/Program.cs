@@ -1,12 +1,12 @@
-﻿using Codeflows.Csharp.Common.Configuration;
-using Codeflows.Csharp.Quality.Services;
-using Codeflows.Csharp.Quality.Workers;
+﻿using CodeFlows.GenAi.OpenAi.Workers;
+using Codeflows.WorkflowDeployer;
 using ConductorSharp.Engine.Extensions;
 using ConductorSharp.Engine.Health;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using OpenAI_API;
 using Serilog;
 
 await Host.CreateDefaultBuilder(args)
@@ -27,27 +27,6 @@ await Host.CreateDefaultBuilder(args)
         {
             builder.ClearProviders();
             builder.AddSerilog(logger);
-        });
-
-        var sonarqubePat =
-            configuration.GetValue<string>("Sonarqube:Token")
-            ?? throw new InvalidOperationException("Sonarqube:Token configuration value not set.");
-
-        var sonarqubeBaseUrl =
-            configuration.GetValue<string>("Sonarqube:BaseUrl")
-            ?? throw new InvalidOperationException(
-                "Sonarqube:BaseUrl configuration value not set."
-            );
-
-        services.AddSingleton(
-            new SonarqubeConfiguration { Token = sonarqubePat, BaseUrl = sonarqubeBaseUrl }
-        );
-
-        services.AddHttpClient<SonarqubeService>(opts =>
-        {
-            opts.BaseAddress = new Uri(sonarqubeBaseUrl);
-
-            opts.DefaultRequestHeaders.Add("Authorization", $"Bearer {sonarqubePat}");
         });
 
         services
@@ -73,13 +52,8 @@ await Host.CreateDefaultBuilder(args)
                 pipelines.AddValidation();
             });
 
-        services.RegisterWorkerTask<GetProjectFileLocations.Handler>();
-        services.RegisterWorkerTask<GetCodeMetrics.Handler>();
-        services.RegisterWorkerTask<AnalyseCode.Handler>(opts =>
-        {
-            opts.TimeoutSeconds = opts.ResponseTimeoutSeconds = 600;
-        });
-        services.RegisterWorkerTask<InitMetricsProject.Handler>();
+        services.RegisterWorkflow<RefactorRepository>();
+        services.RegisterWorkflow<CsharpRefactorProject>();
     })
     .Build()
     .RunAsync();

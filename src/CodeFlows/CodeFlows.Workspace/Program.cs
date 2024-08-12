@@ -1,5 +1,6 @@
 ﻿using CodeFlows.Workspace.Common.Configuration;
 using CodeFlows.Workspace.Github.Workers;
+using CodeFlows.Workspace.Util.Workers;
 using ConductorSharp.Engine.Extensions;
 using ConductorSharp.Engine.Health;
 using Microsoft.Extensions.Configuration;
@@ -52,6 +53,8 @@ await Host.CreateDefaultBuilder(args)
             });
 
         services.RegisterWorkerTask<CloneProject.Handler>();
+        services.RegisterWorkerTask<ForkProjectDetection.Handler>();
+        services.RegisterWorkerTask<ForkProjectAnalysis.Handler>();
     })
     .Build()
     .RunAsync();

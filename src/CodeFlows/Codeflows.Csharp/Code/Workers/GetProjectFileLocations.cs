@@ -14,9 +14,18 @@ namespace Codeflows.Csharp.Quality.Workers
         [Required]
         public required string RepositoryPath { get; set; }
 
-        public record Response(List<string> ProjectFilePaths);
+        [Required]
+        public required string RepositoryName { get; set; }
 
-        [OriginalName("co_get_csproj_locations")]
+        public record Response(
+            List<string> ProjectFilePaths,
+            string ProjectType,
+            string ProjectName,
+            string RepositoryPath,
+            string RepositoryName
+        );
+
+        [OriginalName("detect_projects_csharp")]
         public partial class Handler() : TaskRequestHandler<GetProjectFileLocations, Response>
         {
             public override Task<Response> Handle(
@@ -54,10 +63,18 @@ namespace Codeflows.Csharp.Quality.Workers
                     CsProjectRegex()
                 );
 
-                return Task.FromResult(new Response(csprojPaths));
+                return Task.FromResult(
+                    new Response(
+                        csprojPaths,
+                        "csharp",
+                        request.RepositoryName,
+                        request.RepositoryPath,
+                        request.RepositoryName
+                    )
+                );
             }
 
-            [GeneratedRegex(".+\\.sln")]
+            [GeneratedRegex(".+\\.csproj")]
             private static partial Regex CsProjectRegex();
         }
     }
