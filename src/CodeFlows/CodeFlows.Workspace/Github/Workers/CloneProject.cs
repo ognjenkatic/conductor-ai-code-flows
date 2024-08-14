@@ -57,7 +57,7 @@ namespace CodeFlows.Workspace.Github.Workers
                     StartInfo = new ProcessStartInfo()
                     {
                         FileName = "gh",
-                        Arguments = $"repo clone {request.RepositoryUrl} .",
+                        Arguments = $"repo fork --clone=true {request.RepositoryUrl} .",
                         WorkingDirectory = directoryInfo.FullName,
                     }
                 };

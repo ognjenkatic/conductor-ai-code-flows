@@ -74,7 +74,7 @@ namespace Codeflows.Csharp.Quality.Workers
                 );
             }
 
-            [GeneratedRegex(".+\\.csproj")]
+            [GeneratedRegex(".+\\.sln")]
             private static partial Regex CsProjectRegex();
         }
     }
