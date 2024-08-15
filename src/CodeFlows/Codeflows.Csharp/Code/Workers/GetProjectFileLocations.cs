@@ -1,11 +1,8 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using System.Text.RegularExpressions;
 using Codeflows.Csharp.Common.Configuration;
-using Codeflows.Csharp.Common.Util;
 using ConductorSharp.Engine;
 using ConductorSharp.Engine.Builders.Metadata;
 using MediatR;
-using Microsoft.VisualBasic.FileIO;
 
 namespace Codeflows.Csharp.Quality.Workers
 {
@@ -14,16 +11,7 @@ namespace Codeflows.Csharp.Quality.Workers
         [Required]
         public required string RepositoryPath { get; set; }
 
-        [Required]
-        public required string RepositoryName { get; set; }
-
-        public record Response(
-            List<string> ProjectFilePaths,
-            string ProjectType,
-            string ProjectName,
-            string RepositoryPath,
-            string RepositoryName
-        );
+        public record Response(List<string> ProjectFilePaths, string ProjectType);
 
         [OriginalName("detect_projects_csharp")]
         public partial class Handler() : TaskRequestHandler<GetProjectFileLocations, Response>
@@ -44,38 +32,17 @@ namespace Codeflows.Csharp.Quality.Workers
                     );
                 }
 
-                //var myRepoDirectoryPath = Path.Join(
-                //    StorageConfiguration.MyRootDirectoryPath,
-                //    StringUtils.GetRandomString(32)
-                //);
+                var solutionPaths =
+                    Directory
+                        .EnumerateFiles(
+                            globalRepoDirectoryInfo.FullName,
+                            "*.sln",
+                            SearchOption.AllDirectories
+                        )
+                        .ToList() ?? [];
 
-                //if (Path.Exists(myRepoDirectoryPath))
-                //{
-                //    throw new InvalidOperationException(
-                //        $"Oops, somehow the destination directory already exists"
-                //    );
-                //}
-
-                //FileSystem.CopyDirectory(globalRepoDirectoryInfo.FullName, myRepoDirectoryPath);
-
-                var csprojPaths = DirectoryUtils.GetMatchingDirectoryFilePaths(
-                    globalRepoDirectoryInfo.FullName,
-                    CsProjectRegex()
-                );
-
-                return Task.FromResult(
-                    new Response(
-                        csprojPaths,
-                        "csharp",
-                        request.RepositoryName,
-                        request.RepositoryPath,
-                        request.RepositoryName
-                    )
-                );
+                return Task.FromResult(new Response(solutionPaths, "csharp"));
             }
-
-            [GeneratedRegex(".+\\.sln")]
-            private static partial Regex CsProjectRegex();
         }
     }
 }

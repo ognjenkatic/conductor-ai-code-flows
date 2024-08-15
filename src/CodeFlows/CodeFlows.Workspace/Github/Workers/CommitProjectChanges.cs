@@ -21,7 +21,7 @@ namespace CodeFlows.Workspace.Github.Workers
         [OriginalName("gh_commit_change")]
         public class Handler : TaskRequestHandler<CommitProjectChanges, Response>
         {
-            public override async Task<Response> Handle(
+            public override Task<Response> Handle(
                 CommitProjectChanges request,
                 CancellationToken cancellationToken
             )
@@ -50,12 +50,12 @@ namespace CodeFlows.Workspace.Github.Workers
 
                 if (changes.Count == 0)
                 {
-                    return new Response(false);
+                    return Task.FromResult(new Response(false));
                 }
 
                 repo.Commit(request.CommitMessage, signature, signature);
 
-                return new Response(true);
+                return Task.FromResult(new Response(true));
             }
         }
     }

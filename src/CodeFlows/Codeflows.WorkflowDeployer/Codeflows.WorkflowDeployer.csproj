@@ -5,12 +5,13 @@
     <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\CodeFlows\Codeflows.Csharp\Codeflows.Csharp.csproj" />
-    <ProjectReference Include="..\CodeFlows\CodeFlows.GenAi\CodeFlows.GenAi.csproj" />
-    <ProjectReference Include="..\CodeFlows\CodeFlows.Workspace\CodeFlows.Workspace.csproj" />
+    <ProjectReference Include="..\Codeflows.Csharp\Codeflows.Csharp.csproj" />
+    <ProjectReference Include="..\CodeFlows.GenAi\CodeFlows.GenAi.csproj" />
+    <ProjectReference Include="..\CodeFlows.Workspace\CodeFlows.Workspace.csproj" />
   </ItemGroup>
 
   <ItemGroup>

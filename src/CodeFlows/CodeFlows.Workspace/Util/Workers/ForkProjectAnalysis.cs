@@ -11,6 +11,12 @@ namespace CodeFlows.Workspace.Util.Workers
     public record ForkProjectAnalysis : IRequest<ForkProjectAnalysis.Response>
     {
         [Required]
+        public required string RepositoryPath { get; set; }
+
+        [Required]
+        public required string RepositoryName { get; set; }
+
+        [Required]
         public required Dictionary<
             string,
             ProjectDetectionTaskOutput
@@ -57,7 +63,7 @@ namespace CodeFlows.Workspace.Util.Workers
                     )
                     {
                         throw new InvalidOperationException(
-                            $"Could not match refactor workflow for project {detectedProject.Value.ProjectName}"
+                            $"Could not match refactor workflow for project"
                         );
                     }
 
@@ -81,11 +87,7 @@ namespace CodeFlows.Workspace.Util.Workers
 
                         dynamicTaskInputs.Add(
                             referenceName,
-                            new(
-                                detectedProject.Value.RepositoryPath,
-                                detectedProject.Value.RepositoryName,
-                                projectPath
-                            )
+                            new(request.RepositoryPath, projectPath, request.RepositoryName)
                         );
                     }
                 }

@@ -11,7 +11,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CodeFlows.GenAi", "CodeFlow
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Codeflows.Csharp", "Codeflows.Csharp\Codeflows.Csharp.csproj", "{435FB3BE-2090-41CA-AC72-CB1F88395D60}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Codeflows.WorkflowDeployer", "..\Codeflows.WorkflowDeployer\Codeflows.WorkflowDeployer.csproj", "{6D06CFFB-5CA0-471F-A2EC-86FC08A5CCC9}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Codeflows.WorkflowDeployer", "Codeflows.WorkflowDeployer\Codeflows.WorkflowDeployer.csproj", "{511311ED-9238-4F4C-B015-F528420B7618}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -35,10 +35,10 @@ Global
 		{435FB3BE-2090-41CA-AC72-CB1F88395D60}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{435FB3BE-2090-41CA-AC72-CB1F88395D60}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{435FB3BE-2090-41CA-AC72-CB1F88395D60}.Release|Any CPU.Build.0 = Release|Any CPU
-		{6D06CFFB-5CA0-471F-A2EC-86FC08A5CCC9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{6D06CFFB-5CA0-471F-A2EC-86FC08A5CCC9}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{6D06CFFB-5CA0-471F-A2EC-86FC08A5CCC9}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{6D06CFFB-5CA0-471F-A2EC-86FC08A5CCC9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{511311ED-9238-4F4C-B015-F528420B7618}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{511311ED-9238-4F4C-B015-F528420B7618}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{511311ED-9238-4F4C-B015-F528420B7618}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{511311ED-9238-4F4C-B015-F528420B7618}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

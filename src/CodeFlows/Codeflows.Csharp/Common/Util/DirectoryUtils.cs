@@ -1,6 +1,4 @@
-﻿using System.Text.RegularExpressions;
-
-namespace Codeflows.Csharp.Common.Util
+﻿namespace Codeflows.Csharp.Common.Util
 {
     public record DirectoryMetadata(int NumberOfFiles, long SizeInBytes);
 
@@ -34,36 +32,6 @@ namespace Codeflows.Csharp.Common.Util
             }
 
             return new DirectoryMetadata(numberOfFiles, sizeInBytes);
-        }
-
-        public static List<string> GetMatchingDirectoryFilePaths(
-            string directoryPath,
-            Regex filenameRegex
-        )
-        {
-            if (!Directory.Exists(directoryPath))
-            {
-                throw new InvalidOperationException("Directory at provided path does not exist");
-            }
-
-            var directoryInfo = new DirectoryInfo(directoryPath);
-
-            var matchingFiles = directoryInfo
-                .GetFiles()
-                .Where(f => filenameRegex.IsMatch(f.Name))
-                .Select(f => f.FullName)
-                .ToList();
-
-            directoryInfo
-                .GetDirectories()
-                .ToList()
-                .ForEach(dirInfo =>
-                    matchingFiles.AddRange(
-                        GetMatchingDirectoryFilePaths(dirInfo.FullName, filenameRegex)
-                    )
-                );
-
-            return matchingFiles;
         }
     }
 }

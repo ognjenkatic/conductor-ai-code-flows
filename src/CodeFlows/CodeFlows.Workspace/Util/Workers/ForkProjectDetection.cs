@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.ComponentModel.DataAnnotations;
 using CodeFlows.Workspace.Common.DTOs;
 using ConductorSharp.Client.Generated;
 using ConductorSharp.Client.Service;
@@ -17,9 +12,6 @@ namespace CodeFlows.Workspace.Util.Workers
     {
         [Required]
         public required string RepositoryPath { get; set; }
-
-        [Required]
-        public required string RepositoryName { get; set; }
 
         public record Response(
             List<WorkflowTask> Tasks,
@@ -53,10 +45,7 @@ namespace CodeFlows.Workspace.Util.Workers
                         new WorkflowTask { Name = task.Name, TaskReferenceName = task.Name }
                     );
 
-                    dynamicTaskInputs.Add(
-                        task.Name,
-                        new(request.RepositoryPath, request.RepositoryName)
-                    );
+                    dynamicTaskInputs.Add(task.Name, new(request.RepositoryPath));
                 }
 
                 return new Response(dynamicTasks, dynamicTaskInputs);

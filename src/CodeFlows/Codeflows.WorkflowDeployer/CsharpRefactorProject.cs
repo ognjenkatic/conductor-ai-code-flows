@@ -7,6 +7,7 @@ namespace Codeflows.WorkflowDeployer
 {
     [OriginalName("refactor_project_csharp")]
     [Version(1)]
+    [WorkflowMetadata(FailureWorkflow = typeof(HandleRefactorFailure))]
     public class CsharpRefactorProject(
         WorkflowDefinitionBuilder<
             CsharpRefactorProject,
@@ -33,6 +34,7 @@ namespace Codeflows.WorkflowDeployer
         public required AnalyseCode.Handler AnalyseCode { get; set; }
         public required GetCodeMetrics.Handler GetMetrics { get; set; }
         public required RefactorProject.Handler RefactorProject { get; set; }
+        public required TestBuild.Handler TestBuild { get; set; }
 
         public override void BuildDefinition()
         {
@@ -65,6 +67,11 @@ namespace Codeflows.WorkflowDeployer
                         (Dictionary<string, List<CodeFlows.GenAi.OpenAi.DTOs.CodeFlowIssue>>)
                             (object)wf.GetMetrics.Output.IssuesByFile
                 }
+            );
+
+            _builder.AddTask(
+                wf => wf.TestBuild,
+                wf => new TestBuild { ProjectFilePath = wf.Input.RepositoryPath }
             );
         }
     }

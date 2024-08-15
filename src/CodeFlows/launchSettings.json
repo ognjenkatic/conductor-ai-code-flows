@@ -6,7 +6,8 @@
       "serviceActions": {
         "codeflows.workspace": "StartDebugging",
         "codeflows.csharp": "StartDebugging",
-        "codeflows.genai": "StartDebugging"
+        "codeflows.genai": "StartDebugging",
+        "codeflows.workflowdeployer": "StartDebugging"
       }
     }
   }

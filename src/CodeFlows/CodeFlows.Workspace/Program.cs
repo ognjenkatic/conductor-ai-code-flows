@@ -80,6 +80,7 @@ await Host.CreateDefaultBuilder(args)
         services.RegisterWorkerTask<ForkProjectAnalysis.Handler>();
         services.RegisterWorkerTask<CommitProjectChanges.Handler>();
         services.RegisterWorkerTask<CreatePullRequest.Handler>();
+        services.RegisterWorkerTask<Cleanup.Handler>();
     })
     .Build()
     .RunAsync();

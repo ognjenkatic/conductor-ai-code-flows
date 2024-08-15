@@ -80,6 +80,10 @@ await Host.CreateDefaultBuilder(args)
             opts.TimeoutSeconds = opts.ResponseTimeoutSeconds = 600;
         });
         services.RegisterWorkerTask<InitMetricsProject.Handler>();
+        services.RegisterWorkerTask<TestBuild.Handler>(opts =>
+        {
+            opts.TimeoutSeconds = opts.ResponseTimeoutSeconds = 600;
+        });
     })
     .Build()
     .RunAsync();

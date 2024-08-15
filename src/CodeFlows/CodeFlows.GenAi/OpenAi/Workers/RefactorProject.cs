@@ -46,7 +46,7 @@ namespace CodeFlows.GenAi.OpenAi.Workers
                     "CodeFlows.GenAi.OpenAi.Resources.RefactorPrompt.txt"
                 );
 
-                var maximumPrompts = Math.Max(Math.Min(request.MaximumParallelPrompts, 10), 1);
+                var maximumPrompts = Math.Max(Math.Min(request.MaximumParallelPrompts, 20), 1);
                 var refactoredFiles = new List<string>();
 
                 if (request.IssuesByFile.Count == 0)

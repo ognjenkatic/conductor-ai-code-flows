@@ -37,6 +37,9 @@ namespace CodeFlows.Workspace.Github.Workers
         [Required]
         public required string BaseRef { get; set; }
 
+        [Required]
+        public required bool AreThereAnyChanges { get; set; }
+
         public record Response { }
 
         [OriginalName("gh_create_pr")]
@@ -55,6 +58,12 @@ namespace CodeFlows.Workspace.Github.Workers
                 CancellationToken cancellationToken
             )
             {
+                if (!request.AreThereAnyChanges)
+                {
+                    logger.LogDebug("Skipping pull request creation as no changes were made");
+                    return new Response();
+                }
+
                 var directoryInfo = new DirectoryInfo(
                     Path.Join(StorageConfiguration.RootDirectoryPath, request.RepositoryPath)
                 );
