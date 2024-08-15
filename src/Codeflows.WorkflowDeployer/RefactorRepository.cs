@@ -37,6 +37,8 @@ namespace Codeflows.WorkflowDeployer
         public required ForkProjectAnalysis.Handler PrepareForkAnalysis { get; set; }
         public required DynamicForkJoinTaskModel ForkDetectProjects { get; set; }
         public required DynamicForkJoinTaskModel ForkAnalysis { get; set; }
+        public required CommitProjectChanges.Handler CommitChanges { get; set; }
+        public required CreatePullRequest.Handler CreatePullRequest { get; set; }
 
         public override void BuildDefinition()
         {
@@ -82,6 +84,30 @@ namespace Codeflows.WorkflowDeployer
                         DynamicTasks = wf.PrepareForkAnalysis.Output.Tasks,
                         DynamicTasksI = wf.PrepareForkAnalysis.Output.WorkflowInputs
                     }
+            );
+
+            _builder.AddTask(
+                wf => wf.CommitChanges,
+                wf => new CommitProjectChanges()
+                {
+                    RepositoryPath = wf.CloneRepository.Output.RepositoryPath,
+                    CommitMessage = "test commit"
+                }
+            );
+
+            _builder.AddTask(
+                wf => wf.CreatePullRequest,
+                wf => new CreatePullRequest()
+                {
+                    RepositoryPath = wf.CloneRepository.Output.RepositoryPath,
+                    OriginalOwner = wf.CloneRepository.Output.RepositoryOwner,
+                    RepositoryOwner = wf.CloneRepository.Output.RepositoryOwner,
+                    RepositoryName = wf.CloneRepository.Output.RepositoryName,
+                    BranchName = wf.CloneRepository.Output.BranchName,
+                    PullRequestDescription = "test description",
+                    PullRequestTitle = "test pr",
+                    BaseRef = wf.CloneRepository.Output.DefaultBranch
+                }
             );
         }
     }

@@ -44,22 +44,22 @@ namespace Codeflows.Csharp.Quality.Workers
                     );
                 }
 
-                var myRepoDirectoryPath = Path.Join(
-                    StorageConfiguration.MyRootDirectoryPath,
-                    StringUtils.GetRandomString(32)
-                );
+                //var myRepoDirectoryPath = Path.Join(
+                //    StorageConfiguration.MyRootDirectoryPath,
+                //    StringUtils.GetRandomString(32)
+                //);
 
-                if (Path.Exists(myRepoDirectoryPath))
-                {
-                    throw new InvalidOperationException(
-                        $"Oops, somehow the destination directory already exists"
-                    );
-                }
+                //if (Path.Exists(myRepoDirectoryPath))
+                //{
+                //    throw new InvalidOperationException(
+                //        $"Oops, somehow the destination directory already exists"
+                //    );
+                //}
 
-                FileSystem.CopyDirectory(globalRepoDirectoryInfo.FullName, myRepoDirectoryPath);
+                //FileSystem.CopyDirectory(globalRepoDirectoryInfo.FullName, myRepoDirectoryPath);
 
                 var csprojPaths = DirectoryUtils.GetMatchingDirectoryFilePaths(
-                    myRepoDirectoryPath,
+                    globalRepoDirectoryInfo.FullName,
                     CsProjectRegex()
                 );
 

@@ -1,7 +1,9 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.Diagnostics;
+using CodeFlows.Workspace.Common.Configuration;
 using ConductorSharp.Engine;
 using ConductorSharp.Engine.Builders.Metadata;
+using LibGit2Sharp;
 using MediatR;
 
 namespace CodeFlows.Workspace.Github.Workers
@@ -14,7 +16,7 @@ namespace CodeFlows.Workspace.Github.Workers
         [Required]
         public required string CommitMessage { get; set; }
 
-        public record Response { }
+        public record Response(bool AreThereAnyChanges);
 
         [OriginalName("gh_commit_change")]
         public class Handler : TaskRequestHandler<CommitProjectChanges, Response>
@@ -24,36 +26,36 @@ namespace CodeFlows.Workspace.Github.Workers
                 CancellationToken cancellationToken
             )
             {
-                if (!Directory.Exists(Path.Join(request.RepositoryPath, ".git")))
+                var directoryInfo = new DirectoryInfo(
+                    Path.Join(StorageConfiguration.RootDirectoryPath, request.RepositoryPath)
+                );
+
+                if (!Directory.Exists(Path.Join(directoryInfo.FullName, ".git")))
                 {
                     throw new InvalidOperationException("Repository with .git directory not found");
                 }
 
-                var gitAddProcess = new Process
-                {
-                    StartInfo = new ProcessStartInfo()
-                    {
-                        FileName = "git",
-                        Arguments = $"add .",
-                        WorkingDirectory = request.RepositoryPath,
-                    }
-                };
-                gitAddProcess.Start();
-                await gitAddProcess.WaitForExitAsync(cancellationToken);
+                var signature = new Signature("codebot", "codebot@test.com", DateTimeOffset.UtcNow);
+                using var repo = new Repository(directoryInfo.FullName);
 
-                var gitCommitProcess = new Process
-                {
-                    StartInfo = new ProcessStartInfo()
-                    {
-                        FileName = "git",
-                        Arguments = $"commit -m {request.CommitMessage}",
-                        WorkingDirectory = request.RepositoryPath,
-                    }
-                };
-                gitCommitProcess.Start();
-                await gitCommitProcess.WaitForExitAsync(cancellationToken);
+                var filesToCommit = Directory
+                    .GetFiles(directoryInfo.FullName, "*.cs", SearchOption.AllDirectories)
+                    .Where(f => !f.Contains(".sonarqube"))
+                    .Select(f => Path.GetRelativePath(directoryInfo.FullName, f))
+                    .ToArray();
 
-                return new();
+                Commands.Stage(repo, filesToCommit);
+
+                var changes = repo.Diff.Compare<TreeChanges>(null, true);
+
+                if (changes.Count == 0)
+                {
+                    return new Response(false);
+                }
+
+                repo.Commit(request.CommitMessage, signature, signature);
+
+                return new Response(true);
             }
         }
     }

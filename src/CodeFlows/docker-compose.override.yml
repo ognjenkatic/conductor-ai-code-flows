@@ -17,6 +17,7 @@ services:
     image: ${DOCKER_REGISTRY-}codeflowsgenai
     volumes:
       - csharp-repository-volume:/app/my-repos
+      - repository-volume:/app/global-repos
 
   sonarqube:
     image: sonarqube:community

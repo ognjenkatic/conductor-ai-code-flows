@@ -5,6 +5,7 @@ USER app
 WORKDIR /app
 
 RUN mkdir /app/my-repos
+RUN mkdir /app/global-repos
 
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 ARG BUILD_CONFIGURATION=Release

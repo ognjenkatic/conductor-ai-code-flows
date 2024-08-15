@@ -1,12 +1,13 @@
-﻿using CodeFlows.Workspace.Common.Configuration;
-using CodeFlows.Workspace.Github.Workers;
+﻿using CodeFlows.Workspace.Github.Workers;
 using CodeFlows.Workspace.Util.Workers;
 using ConductorSharp.Engine.Extensions;
 using ConductorSharp.Engine.Health;
+using LibGit2Sharp;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Octokit;
 using Serilog;
 
 await Host.CreateDefaultBuilder(args)
@@ -29,6 +30,28 @@ await Host.CreateDefaultBuilder(args)
             builder.AddSerilog(logger);
         });
 
+        var ghToken =
+            configuration.GetValue<string>("GH_TOKEN")
+            ?? throw new InvalidOperationException("GH_TOKEN value not set.");
+
+        services.AddSingleton(
+            new GitHubClient(new ProductHeaderValue("Codebot"))
+            {
+                Credentials = new Octokit.Credentials(ghToken)
+            }
+        );
+
+        services.AddSingleton(
+            new UsernamePasswordCredentials()
+            {
+                Username =
+                    configuration.GetValue<string>("GH_USERNAME")
+                    ?? throw new InvalidOperationException(
+                        "GH_USERNAME configuration value not set."
+                    ),
+                Password = ghToken
+            }
+        );
         services
             .AddConductorSharp(
                 baseUrl: configuration.GetValue<string>("Conductor:BaseUrl")
@@ -55,6 +78,8 @@ await Host.CreateDefaultBuilder(args)
         services.RegisterWorkerTask<CloneProject.Handler>();
         services.RegisterWorkerTask<ForkProjectDetection.Handler>();
         services.RegisterWorkerTask<ForkProjectAnalysis.Handler>();
+        services.RegisterWorkerTask<CommitProjectChanges.Handler>();
+        services.RegisterWorkerTask<CreatePullRequest.Handler>();
     })
     .Build()
     .RunAsync();
