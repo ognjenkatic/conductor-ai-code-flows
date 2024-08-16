@@ -27,3 +27,10 @@ services:
       context: .
       dockerfile: Codeflows.WorkflowDeployer/Dockerfile
 
+
+  codeflows.portal:
+    image: ${DOCKER_REGISTRY-}codeflowsportal
+    build:
+      context: .
+      dockerfile: Codeflows.Portal/Dockerfile
+

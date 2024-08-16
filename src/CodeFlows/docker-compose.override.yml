@@ -1,6 +1,17 @@
 version: '3.4'
 
 services:
+  codeflows.db:
+    image: postgres:12
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - psqlvolume:/var/lib/postgresql
+      - psqlvolume_data:/var/lib/postgresql/data
+    ports:
+      - "5433:5432"
+
   codeflows.workspace:
     env_file: "Dockerfile.env"
     volumes:
@@ -42,6 +53,18 @@ services:
     volumes:
       - postgresql:/var/lib/postgresql
       - postgresql_data:/var/lib/postgresql/data
+
+  codeflows.portal:
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_HTTP_PORTS=8080
+      - ASPNETCORE_HTTPS_PORTS=8081
+    ports:
+      - "8080"
+      - "8081"
+    volumes:
+      - ${APPDATA}/Microsoft/UserSecrets:/home/app/.microsoft/usersecrets:ro
+      - ${APPDATA}/ASP.NET/Https:/home/app/.aspnet/https:ro
 volumes:
   csharp-tools-volume:
   repository-volume:
@@ -53,3 +76,6 @@ volumes:
   sonarqube_logs:
   postgresql:
   postgresql_data:
+  psqlvolume:
+  psqlvolume_data:
+    

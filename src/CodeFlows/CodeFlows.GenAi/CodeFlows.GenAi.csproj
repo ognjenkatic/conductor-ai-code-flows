@@ -17,7 +17,7 @@
   </ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="ConductorSharp.Engine" Version="3.0.1-beta7" />
+		<PackageReference Include="ConductorSharp.Engine" Version="3.0.1-beta9" />
 		<PackageReference Include="Microsoft.Extensions.Hosting" Version="8.0.0" />
 		<PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.20.1" />
 		<PackageReference Include="OpenAI" Version="1.11.0" />

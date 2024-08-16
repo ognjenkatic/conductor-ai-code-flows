@@ -1,4 +1,6 @@
-﻿using CodeFlows.Workspace.Common.DTOs;
+﻿using Codeflows.Portal.Application.Workers;
+using Codeflows.Portal.Infrastructure.Persistence.Entities;
+using CodeFlows.Workspace.Common.DTOs;
 using CodeFlows.Workspace.Github.Workers;
 using CodeFlows.Workspace.Util.Workers;
 using ConductorSharp.Engine.Builders;
@@ -25,6 +27,7 @@ namespace Codeflows.WorkflowDeployer
         public class RefactorRepositoryInput : WorkflowInput<RefactorRepositoryOutput>
         {
             public required string RepositoryUrl { get; set; }
+            public required int RefactorRunId { get; set; }
         }
 
         public class RefactorRepositoryOutput : WorkflowOutput { }
@@ -37,9 +40,20 @@ namespace Codeflows.WorkflowDeployer
         public required CommitProjectChanges.Handler CommitChanges { get; set; }
         public required CreatePullRequest.Handler CreatePullRequest { get; set; }
         public required Cleanup.Handler Cleanup { get; set; }
+        public required UpdateRefactorRun.Handler UpdateStateToCompleted { get; set; }
+        public required UpdateRefactorRun.Handler UpdateStateToRunning { get; set; }
 
         public override void BuildDefinition()
         {
+            _builder.AddTask(
+                wf => wf.UpdateStateToRunning,
+                wf => new UpdateRefactorRun()
+                {
+                    RefactorRunId = wf.Input.RefactorRunId,
+                    State = RefactorRunState.Running
+                }
+            );
+
             _builder.AddTask(
                 wf => wf.CloneRepository,
                 wf => new CloneProject() { RepositoryUrl = wf.Input.RepositoryUrl }
@@ -114,6 +128,15 @@ namespace Codeflows.WorkflowDeployer
             _builder.AddTask(
                 wf => wf.Cleanup,
                 wf => new Cleanup() { RepositoryPath = wf.CloneRepository.Output.RepositoryPath }
+            );
+
+            _builder.AddTask(
+                wf => wf.UpdateStateToCompleted,
+                wf => new UpdateRefactorRun()
+                {
+                    RefactorRunId = wf.Input.RefactorRunId,
+                    State = RefactorRunState.Success
+                }
             );
         }
     }

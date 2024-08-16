@@ -11,11 +11,12 @@
   <ItemGroup>
     <ProjectReference Include="..\Codeflows.Csharp\Codeflows.Csharp.csproj" />
     <ProjectReference Include="..\CodeFlows.GenAi\CodeFlows.GenAi.csproj" />
+    <ProjectReference Include="..\Codeflows.Portal\Codeflows.Portal.csproj" />
     <ProjectReference Include="..\CodeFlows.Workspace\CodeFlows.Workspace.csproj" />
   </ItemGroup>
 
   <ItemGroup>
-		<PackageReference Include="ConductorSharp.Engine" Version="3.0.1-beta7" />
+		<PackageReference Include="ConductorSharp.Engine" Version="3.0.1-beta9" />
 		<PackageReference Include="Microsoft.Extensions.Hosting" Version="8.0.0" />
 		<PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.20.1" />
 		<PackageReference Include="Serilog" Version="4.0.1" />

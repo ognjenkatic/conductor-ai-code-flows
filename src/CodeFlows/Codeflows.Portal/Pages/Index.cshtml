@@ -1,0 +1,62 @@
+﻿@page
+@model Codeflows.Portal.Pages.IndexModel
+
+@{
+    ViewData["Title"] = "Refactor Runs";
+}
+
+<h2>@ViewData["Title"]</h2>
+
+<form method="post" asp-page-handler="SubmitUrl">
+    <div class="form-group">
+        <label for="projectUrl">Project Url</label>
+        <input type="url" id="projectUrl" name="projectUrl" class="form-control" required />
+    </div>
+    <button type="submit" class="btn btn-primary">Submit</button>
+</form>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Workflow ID</th>
+            <th>Repository URL</th>
+            <th>State</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var run in Model.RefactorRuns)
+        {
+            <tr>
+                <td>@run.Id</td>
+                <td>@run.WorkflowId</td>
+                <td>@run.RepositoryUrl</td>
+                <td>@run.State</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<div class="pagination">
+    @if (Model.CurrentPage > 1)
+    {
+        <a asp-page="/Index" asp-route-pageNumber="@(Model.CurrentPage - 1)" asp-route-pageSize="10" class="btn btn-primary">Previous</a>
+    }
+
+    @for (var i = 1; i <= Model.TotalPages; i++)
+    {
+        if (i == Model.CurrentPage)
+        {
+            <span class="btn btn-secondary disabled">@i</span>
+        }
+        else
+        {
+            <a asp-page="/Index" asp-route-pageNumber="@i" asp-route-pageSize="10" class="btn btn-primary">@i</a>
+        }
+    }
+
+    @if (Model.CurrentPage < Model.TotalPages)
+    {
+        <a asp-page="/Index" asp-route-pageNumber="@(Model.CurrentPage + 1)" asp-route-pageSize="10" class="btn btn-primary">Next</a>
+    }
+</div>
