@@ -10,7 +10,13 @@
 <form method="post" asp-page-handler="SubmitUrl">
     <div class="form-group">
         <label for="projectUrl">Project Url</label>
-        <input type="url" id="projectUrl" name="projectUrl" class="form-control" required />
+        <select id="projectUrl" name="projectUrl" class="form-control" required>
+            <option value="" disabled selected>Select a project</option>
+            @foreach (var repo in Model.WhitelistedRepos)
+            {
+                <option value="@repo">@repo</option>
+            }
+        </select>
     </div>
     <button type="submit" class="btn btn-primary">Submit</button>
 </form>

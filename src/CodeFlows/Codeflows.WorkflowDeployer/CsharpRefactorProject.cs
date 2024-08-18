@@ -7,7 +7,6 @@ namespace Codeflows.WorkflowDeployer
 {
     [OriginalName("refactor_project_csharp")]
     [Version(1)]
-    [WorkflowMetadata(FailureWorkflow = typeof(HandleRefactorFailure))]
     public class CsharpRefactorProject(
         WorkflowDefinitionBuilder<
             CsharpRefactorProject,

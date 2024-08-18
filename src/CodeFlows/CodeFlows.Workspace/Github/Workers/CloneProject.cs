@@ -1,11 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Diagnostics;
-using System.Linq;
-using System.Text;
+﻿using System.ComponentModel.DataAnnotations;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 using CodeFlows.Workspace.Common.Configuration;
 using CodeFlows.Workspace.Common.Util;
 using ConductorSharp.Engine;
@@ -22,6 +16,9 @@ namespace CodeFlows.Workspace.Github.Workers
         [Required]
         [Url]
         public required string RepositoryUrl { get; set; }
+
+        [Required]
+        public required string RepositoryPath { get; set; }
 
         public record Response(
             string RepositoryPath,
@@ -50,10 +47,8 @@ namespace CodeFlows.Workspace.Github.Workers
                         "Could not parse repository owner and name from url"
                     );
 
-                var directoryName = StringUtils.GetRandomString(32);
-
                 var directoryInfo = new DirectoryInfo(
-                    Path.Join(StorageConfiguration.RootDirectoryPath, directoryName)
+                    Path.Join(StorageConfiguration.RootDirectoryPath, request.RepositoryPath)
                 );
 
                 if (directoryInfo.Exists)
@@ -102,7 +97,7 @@ namespace CodeFlows.Workspace.Github.Workers
                 }
 
                 return new Response(
-                    directoryName,
+                    request.RepositoryPath,
                     repositoryMetadata.NumberOfFiles,
                     repositoryMetadata.SizeInBytes,
                     Name,

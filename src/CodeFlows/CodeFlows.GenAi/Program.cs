@@ -64,6 +64,7 @@ await Host.CreateDefaultBuilder(args)
         services.RegisterWorkerTask<RefactorProject.Handler>(opts =>
         {
             opts.TimeoutSeconds = opts.ResponseTimeoutSeconds = 600;
+            opts.Description = "Refactors project files using ChatGPT";
         });
     })
     .Build()

@@ -78,11 +78,14 @@ await Host.CreateDefaultBuilder(args)
         services.RegisterWorkerTask<AnalyseCode.Handler>(opts =>
         {
             opts.TimeoutSeconds = opts.ResponseTimeoutSeconds = 600;
+            opts.Description =
+                "Perform code analysis using well known tools to obtain a list of files that need to be refactored";
         });
         services.RegisterWorkerTask<InitMetricsProject.Handler>();
         services.RegisterWorkerTask<TestBuild.Handler>(opts =>
         {
             opts.TimeoutSeconds = opts.ResponseTimeoutSeconds = 600;
+            opts.Description = "Execute test build to ensure project compiles";
         });
     })
     .Build()

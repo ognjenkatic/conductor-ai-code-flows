@@ -34,6 +34,7 @@ builder
 builder.Services.RegisterWorkerTask<UpdateRefactorRun.Handler>();
 
 builder.Services.AddSingleton<RepositoryWhitelist>();
+builder.Services.AddScoped<RefactorRunService>();
 
 builder.Services.AddDbContext<CodeflowsDbContext>(options =>
 {

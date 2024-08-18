@@ -11,6 +11,7 @@ namespace Codeflows.WorkflowDeployer
 {
     [OriginalName("refactor_repository")]
     [Version(1)]
+    [WorkflowMetadata(FailureWorkflow = typeof(HandleRefactorFailure))]
     public class RefactorRepository(
         WorkflowDefinitionBuilder<
             RefactorRepository,
@@ -28,6 +29,7 @@ namespace Codeflows.WorkflowDeployer
         {
             public required string RepositoryUrl { get; set; }
             public required int RefactorRunId { get; set; }
+            public required string RepositoryPath { get; set; }
         }
 
         public class RefactorRepositoryOutput : WorkflowOutput { }
@@ -56,7 +58,11 @@ namespace Codeflows.WorkflowDeployer
 
             _builder.AddTask(
                 wf => wf.CloneRepository,
-                wf => new CloneProject() { RepositoryUrl = wf.Input.RepositoryUrl }
+                wf => new CloneProject()
+                {
+                    RepositoryUrl = wf.Input.RepositoryUrl,
+                    RepositoryPath = wf.Input.RepositoryPath
+                }
             );
 
             _builder.AddTask(

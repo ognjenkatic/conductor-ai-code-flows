@@ -75,12 +75,22 @@ await Host.CreateDefaultBuilder(args)
                 pipelines.AddValidation();
             });
 
-        services.RegisterWorkerTask<CloneProject.Handler>();
+        services.RegisterWorkerTask<CloneProject.Handler>(opts =>
+        {
+            opts.Description = "Clones a GitHub project repository to the local workspace";
+        });
         services.RegisterWorkerTask<ForkProjectDetection.Handler>();
         services.RegisterWorkerTask<ForkProjectAnalysis.Handler>();
         services.RegisterWorkerTask<CommitProjectChanges.Handler>();
-        services.RegisterWorkerTask<CreatePullRequest.Handler>();
-        services.RegisterWorkerTask<Cleanup.Handler>();
+        services.RegisterWorkerTask<CreatePullRequest.Handler>(opts =>
+        {
+            opts.Description =
+                "Creates a pull request with code changes to the GitHub project repository";
+        });
+        services.RegisterWorkerTask<Cleanup.Handler>(opts =>
+        {
+            opts.Description = "Clean up local workspace by deleting the cloned repository";
+        });
     })
     .Build()
     .RunAsync();

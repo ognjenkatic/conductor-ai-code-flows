@@ -1,4 +1,5 @@
 using Codeflows.Portal.Application.Services;
+using CodeFlows.Portal.Application.Utils;
 using Codeflows.Portal.DTOs;
 using Codeflows.Portal.Infrastructure.Persistence;
 using Codeflows.Portal.Infrastructure.Persistence.Entities;
@@ -20,6 +21,7 @@ namespace Codeflows.Portal.Pages
         private readonly ILogger<IndexModel> _logger = logger;
         private readonly CodeflowsDbContext _dbContext = dbContext;
         private readonly RepositoryWhitelist repositoryWhitelist = repositoryWhitelist;
+
         private static readonly RefactorRunState[] terminalStates =
         [
             RefactorRunState.Rejected,
@@ -30,6 +32,7 @@ namespace Codeflows.Portal.Pages
         public List<RefactorRunDTO> RefactorRuns { get; set; } = [];
         public int CurrentPage { get; set; }
         public int TotalPages { get; set; }
+        public string[] WhitelistedRepos { get; set; } = RepositoryWhitelist.WhitelistedRepos;
 
         public async Task OnGet(
             int pageNumber = 1,
@@ -57,6 +60,7 @@ namespace Codeflows.Portal.Pages
                 .ToListAsync(cancellationToken);
 
             CurrentPage = pageNumber;
+            TotalPages = (int)Math.Ceiling(totalCount / (double)pageSize);
         }
 
         public async Task<IActionResult> OnPostSubmitUrl(
@@ -97,7 +101,7 @@ namespace Codeflows.Portal.Pages
 
             try
             {
-                var workflow = workflowService.StartAsync(
+                refactorRun.WorkflowId = await workflowService.StartAsync(
                     new()
                     {
                         Version = 1,
@@ -105,11 +109,14 @@ namespace Codeflows.Portal.Pages
                         Input = new Dictionary<string, object>
                         {
                             { "repository_url", refactorRun.RepositoryUrl },
-                            { "refactor_run_id", refactorRun.Id }
+                            { "refactor_run_id", refactorRun.Id },
+                            { "repository_path", StringUtils.GetRandomString(32) }
                         }
                     },
                     cancellationToken
                 );
+
+                await _dbContext.SaveChangesAsync(cancellationToken);
             }
             catch (Exception ex)
             {
