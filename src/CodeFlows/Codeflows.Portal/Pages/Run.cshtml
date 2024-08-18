@@ -19,6 +19,10 @@
             {
                 <p class="card-text"><strong>Note:</strong> @Model.RefactorRun.Note</p>
             }
+            @if (!string.IsNullOrEmpty(Model.RefactorRun.PullRequestUrl))
+            {
+                <p class="card-text"><strong>Pull Request URL:</strong> @Model.RefactorRun.PullRequestUrl</p>
+            }
         </div>
     </div>
 

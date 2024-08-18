@@ -70,4 +70,5 @@ var dbContext = scope.ServiceProvider.GetRequiredService<CodeflowsDbContext>();
 
 await dbContext.Database.MigrateAsync();
 
+// TODO: Handle exceptions in some kind of middleware
 app.Run();

@@ -15,6 +15,7 @@
         public string? WorkflowId { get; set; }
         public string? Note { get; set; }
         public required string RepositoryUrl { get; set; }
+        public string? PullRequestUrl { get; set; }
         public RefactorRunState State { get; set; }
     }
 }

@@ -2,6 +2,7 @@
 using Codeflows.Portal.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -10,9 +11,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Codeflows.Portal.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(CodeflowsDbContext))]
-    partial class CodeflowsDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240818210418_AddPullRequestUrl")]
+    partial class AddPullRequestUrl
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

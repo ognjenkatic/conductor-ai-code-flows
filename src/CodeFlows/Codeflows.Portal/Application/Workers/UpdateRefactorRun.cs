@@ -14,6 +14,7 @@ namespace Codeflows.Portal.Application.Workers
 
         [Required]
         public required RefactorRunState State { get; set; }
+        public string? PullRequestUrl { get; set; }
 
         public class Response { }
 
@@ -38,6 +39,7 @@ namespace Codeflows.Portal.Application.Workers
                     );
 
                 refactorRun.State = request.State;
+                refactorRun.PullRequestUrl = request.PullRequestUrl ?? refactorRun.PullRequestUrl;
 
                 await dbContext.SaveChangesAsync(cancellationToken);
 

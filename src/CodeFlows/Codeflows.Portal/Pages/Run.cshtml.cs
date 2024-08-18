@@ -54,7 +54,8 @@ namespace Codeflows.Portal.Pages
                 Id = refactorRun.Id,
                 Note = refactorRun.Note,
                 State = refactorRun.State.ToString(),
-                WorkflowId = refactorRun.WorkflowId
+                WorkflowId = refactorRun.WorkflowId,
+                PullRequestUrl = refactorRun.PullRequestUrl
             };
 
             RefactorRunTasks = await refactorRunService.GetRefactorRunTasks(
