@@ -20,3 +20,23 @@ html {
 body {
   margin-bottom: 60px;
 }
+
+.badge-success {
+    background-color: lightgray;
+    color: green;
+}
+
+.badge-warning {
+    background-color: lightgray;
+    color: yellow;
+}
+
+.badge-danger {
+    background-color: lightgray;
+    color: red;
+}
+
+.badge-secondary {
+    background-color: lightgray;
+    color: yellowgreen;
+}

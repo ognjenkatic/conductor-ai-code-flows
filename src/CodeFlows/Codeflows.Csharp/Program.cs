@@ -73,7 +73,10 @@ await Host.CreateDefaultBuilder(args)
                 pipelines.AddValidation();
             });
 
-        services.RegisterWorkerTask<GetProjectFileLocations.Handler>();
+        services.RegisterWorkerTask<GetProjectFileLocations.Handler>(opts =>
+        {
+            opts.Description = "Locate C# solution files in the repository";
+        });
         services.RegisterWorkerTask<GetCodeMetrics.Handler>();
         services.RegisterWorkerTask<AnalyseCode.Handler>(opts =>
         {

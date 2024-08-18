@@ -17,24 +17,52 @@ namespace Codeflows.Portal.Pages
             this.refactorRunService = refactorRunService;
         }
 
-        public List<RefactorRunTask> RefactorRunTasks { get; set; } = [];
+        public List<RefactorRunTask> RefactorRunTasks { get; set; } = new List<RefactorRunTask>();
 
-        public async Task OnGet(int runId, CancellationToken cancellationToken = default)
+        public RefactorRunDTO RefactorRun { get; set; }
+
+        public string GetStatusBadgeClass(RefactorRunTaskState status)
         {
-            var refactorRun = await dbContext.RefactorRuns.FindAsync([runId], cancellationToken);
+            return status switch
+            {
+                RefactorRunTaskState.Completed => "badge-success",
+                RefactorRunTaskState.InProgress => "badge-warning",
+                RefactorRunTaskState.Failed => "badge-danger",
+                RefactorRunTaskState.FailedWithTerminalError => "badge-danger",
+                _ => "badge-secondary",
+            };
+        }
+
+        public async Task<IActionResult> OnGetAsync(
+            int runId,
+            CancellationToken cancellationToken = default
+        )
+        {
+            var refactorRun = await dbContext.RefactorRuns.FindAsync(
+                new object[] { runId },
+                cancellationToken
+            );
 
             if (refactorRun is null)
             {
-                RedirectToPage("Index");
-                return;
+                return RedirectToPage("Index");
             }
+
+            RefactorRun = new()
+            {
+                RepositoryUrl = refactorRun.RepositoryUrl,
+                Id = refactorRun.Id,
+                Note = refactorRun.Note,
+                State = refactorRun.State.ToString(),
+                WorkflowId = refactorRun.WorkflowId
+            };
 
             RefactorRunTasks = await refactorRunService.GetRefactorRunTasks(
                 refactorRun.Id,
                 cancellationToken
             );
 
-            return;
+            return Page();
         }
     }
 }

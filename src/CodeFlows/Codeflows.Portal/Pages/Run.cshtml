@@ -1,4 +1,87 @@
 ﻿@page
 @model Codeflows.Portal.Pages.RunModel
 @{
+    ViewData["Title"] = "Refactor Run Details";
+    bool shouldRefresh = Model.RefactorRun.State == "Scheduled" || Model.RefactorRun.State == "Running";
+}
+
+<div class="container mt-4">
+    <h2>Details of the refactor run</h2>
+
+    <div class="card mb-4">
+        <div class="card-body">
+            <h5 class="card-title">General Information</h5>
+            <p class="card-text"><strong>Run ID:</strong> @Model.RefactorRun.Id</p>
+            <p class="card-text"><strong>Workflow ID:</strong> @Model.RefactorRun.WorkflowId</p>
+            <p class="card-text"><strong>Repository URL:</strong> @Model.RefactorRun.RepositoryUrl</p>
+            <p class="card-text"><strong>State:</strong> @Model.RefactorRun.State</p>
+            @if (!string.IsNullOrEmpty(Model.RefactorRun.Note))
+            {
+                <p class="card-text"><strong>Note:</strong> @Model.RefactorRun.Note</p>
+            }
+        </div>
+    </div>
+
+    @if (shouldRefresh)
+    {
+        <div class="alert alert-warning">
+            Run in progress, refreshing page in <span id="countdown">5</span> seconds...
+        </div>
+    }
+
+    @if (Model.RefactorRunTasks.Any())
+    {
+        <table class="table table-striped table-hover mt-3">
+            <thead>
+                <tr>
+                    <th scope="col">Task Name</th>
+                    <th scope="col">Status</th>
+                    <th scope="col">Duration (seconds)</th>
+                    <th scope="col">Description</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var task in Model.RefactorRunTasks)
+                {
+                    <tr>
+                        <td>@task.Name</td>
+                        <td>
+                            <span class="badge @Model.GetStatusBadgeClass(task.Status)">
+                                @task.Status.ToString()
+                            </span>
+                        </td>
+                        <td>@task.DurationSeconds</td>
+                        <td>@task.Description</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+    else
+    {
+        <div class="alert alert-info mt-3" role="alert">
+            No tasks found for this refactor run.
+        </div>
+    }
+</div>
+
+@section Scripts {
+    @if (shouldRefresh)
+    {
+        <script type="text/javascript">
+            var countdown = 5;
+            var countdownElement = document.getElementById("countdown");
+
+            function updateCountdown() {
+                countdown--;
+                if (countdown <= 0) {
+                    location.reload();
+                } else {
+                    countdownElement.textContent = countdown;
+                }
+            }
+
+            setInterval(updateCountdown, 1000);
+        </script>
+    }
 }

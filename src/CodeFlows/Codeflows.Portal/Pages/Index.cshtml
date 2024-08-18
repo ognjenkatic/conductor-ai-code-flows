@@ -21,13 +21,14 @@
     <button type="submit" class="btn btn-primary">Submit</button>
 </form>
 
-<table class="table table-striped">
+<table class="table table-striped mt-4">
     <thead>
         <tr>
             <th>ID</th>
             <th>Workflow ID</th>
             <th>Repository URL</th>
             <th>State</th>
+            <th>Details</th>
         </tr>
     </thead>
     <tbody>
@@ -38,12 +39,17 @@
                 <td>@run.WorkflowId</td>
                 <td>@run.RepositoryUrl</td>
                 <td>@run.State</td>
+                <td>
+                    <a asp-page="/Run" asp-route-runId="@run.Id" class="btn btn-info">
+                        View Details
+                    </a>
+                </td>
             </tr>
         }
     </tbody>
 </table>
 
-<div class="pagination">
+<div class="pagination mt-4">
     @if (Model.CurrentPage > 1)
     {
         <a asp-page="/Index" asp-route-pageNumber="@(Model.CurrentPage - 1)" asp-route-pageSize="10" class="btn btn-primary">Previous</a>
