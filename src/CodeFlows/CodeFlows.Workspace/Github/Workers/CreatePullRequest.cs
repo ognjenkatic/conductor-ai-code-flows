@@ -1,5 +1,4 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using System.Diagnostics;
 using CodeFlows.Workspace.Common.Configuration;
 using ConductorSharp.Engine;
 using ConductorSharp.Engine.Builders.Metadata;
@@ -7,7 +6,6 @@ using LibGit2Sharp;
 using MediatR;
 using Microsoft.Extensions.Logging;
 using Octokit;
-using Serilog.Core;
 
 namespace CodeFlows.Workspace.Github.Workers
 {
@@ -40,7 +38,10 @@ namespace CodeFlows.Workspace.Github.Workers
         [Required]
         public required bool AreThereAnyChanges { get; set; }
 
-        public record Response { }
+        public record Response
+        {
+            public string? PullRequestUrl { get; set; }
+        }
 
         [OriginalName("gh_create_pr")]
         public class Handler(
@@ -99,7 +100,8 @@ namespace CodeFlows.Workspace.Github.Workers
                 );
 
                 logger.LogDebug("Created pull request at {pullRequestUrl}", pr.HtmlUrl);
-                return new();
+
+                return new() { PullRequestUrl = pr.Url };
             }
         }
     }

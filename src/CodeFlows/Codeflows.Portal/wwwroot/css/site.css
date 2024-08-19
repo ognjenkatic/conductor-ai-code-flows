@@ -40,3 +40,107 @@ body {
     background-color: lightgray;
     color: yellowgreen;
 }
+
+.error-plate {
+    background: repeating-linear-gradient( 45deg, #ff0000, #ff0000 10px, #780000 10px, #780000 20px );
+    border-radius: 8px;
+    color: white;
+}
+
+.success-plate {
+    background: repeating-linear-gradient( 45deg, #56b006, #56b006 10px, green 10px, green 20px );
+    border-radius: 8px;
+    color: white;
+}
+
+.info-plate {
+    background: repeating-linear-gradient( 45deg, #258cfb, #258cfb 10px, blue 10px, blue 20px );
+    border-radius: 8px;
+    color: white;
+}
+
+.card-body-text {
+    background-color: #00000085;
+    padding: 10px;
+    border-radius: 8px;
+    margin-right: 20px;
+}
+
+/* Add a border and some padding to the image */
+.success-plate img {
+    border: 5px solid black; /* Blue border */
+    border-radius: 8px; /* Slightly rounded corners */
+    padding: 0px; /* Space between the image and the border */
+    animation: bounce 2s infinite; /* Animation for bouncing */
+}
+
+/* Add a border and some padding to the image */
+.error-plate img {
+    border: 5px solid black; /* Blue border */
+    border-radius: 8px; /* Slightly rounded corners */
+    padding: 0px; /* Space between the image and the border */
+    animation: bounce-horizontal 2s infinite; /* Animation for bouncing */
+}
+
+/* Add a border and some padding to the image */
+.info-plate img {
+    border: 5px solid black; /* Blue border */
+    border-radius: 8px; /* Slightly rounded corners */
+    padding: 0px; /* Space between the image and the border */
+    animation: zoom 2s infinite; /* Animation for bouncing */
+}
+
+/* Hide the image when the card-body width is below 300px */
+@media (max-width: 600px) {
+    .info-plate img {
+        display: none;
+    }
+    .error-plate img {
+        display: none;
+    }
+    .success-plate img {
+        display: none;
+    }
+}
+
+/* Define the zoom animation */
+@keyframes zoom {
+    0%, 100% {
+        transform: scale(1); /* Normal size */
+    }
+
+    50% {
+        transform: scale(1.05); /* Slightly zoomed in */
+    }
+}
+
+/* Define the bounce animation */
+@keyframes bounce {
+    0%, 20%, 50%, 80%, 100% {
+        transform: translateY(0); /* Default position */
+    }
+
+    40% {
+        transform: translateY(-10px); /* Move up */
+    }
+
+    60% {
+        transform: translateY(-10px); /* Move down slightly */
+    }
+}
+
+
+/* Define the horizontal bounce animation */
+@keyframes bounce-horizontal {
+    0%, 20%, 50%, 80%, 100% {
+        transform: translateX(0); /* Default position */
+    }
+
+    40% {
+        transform: translateX(-10px); /* Move left */
+    }
+
+    60% {
+        transform: translateX(10px); /* Move right */
+    }
+}

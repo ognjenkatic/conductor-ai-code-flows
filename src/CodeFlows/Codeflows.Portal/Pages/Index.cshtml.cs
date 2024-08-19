@@ -125,7 +125,7 @@ namespace Codeflows.Portal.Pages
                 refactorRun.Note = "Job could not be started";
                 await _dbContext.SaveChangesAsync(cancellationToken);
             }
-            return RedirectToPage();
+            return RedirectToPage("Run", new { runId = refactorRun.Id });
         }
     }
 }

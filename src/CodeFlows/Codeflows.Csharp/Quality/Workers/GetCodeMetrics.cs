@@ -20,6 +20,13 @@ namespace Codeflows.Csharp.Quality.Workers
             : TaskRequestHandler<GetCodeMetrics, Response>
         {
             private readonly SonarqubeService sonarqubeService = sonarqubeService;
+            private static readonly string[] blacklistedIssueMessages =
+            [
+                // This requires rename across repository which is not trivial
+                "Make this class name end with",
+                // Not sure i understand this one
+                "Change the visibility of this constructor to 'protected'"
+            ];
 
             public override async Task<Response> Handle(
                 GetCodeMetrics request,
@@ -42,30 +49,33 @@ namespace Codeflows.Csharp.Quality.Workers
                         cancellationToken
                     );
 
-                    queryResponse.Issues.ForEach(issue =>
-                    {
-                        if (
-                            !codeFlowIssues.TryGetValue(
-                                issue.Component,
-                                out List<CodeFlowIssue>? value
-                            )
-                        )
+                    queryResponse
+                        .Issues.Where(IsNotBlacklistedIssue)
+                        .ToList()
+                        .ForEach(issue =>
                         {
-                            value = ([]);
-                            codeFlowIssues.Add(issue.Component, value);
-                        }
-
-                        value.Add(
-                            new CodeFlowIssue()
+                            if (
+                                !codeFlowIssues.TryGetValue(
+                                    issue.Component,
+                                    out List<CodeFlowIssue>? value
+                                )
+                            )
                             {
-                                Message = issue.Message,
-                                StartLine = issue.TextRange.StartLine,
-                                EndLine = issue.TextRange.EndLine,
-                                StartPos = issue.TextRange.StartOffset,
-                                EndPos = issue.TextRange.EndOffset
+                                value = ([]);
+                                codeFlowIssues.Add(issue.Component, value);
                             }
-                        );
-                    });
+
+                            value.Add(
+                                new CodeFlowIssue()
+                                {
+                                    Message = issue.Message,
+                                    StartLine = issue.TextRange.StartLine,
+                                    EndLine = issue.TextRange.EndLine,
+                                    StartPos = issue.TextRange.StartOffset,
+                                    EndPos = issue.TextRange.EndOffset
+                                }
+                            );
+                        });
 
                     issuesLoaded += queryResponse.Issues.Count;
 
@@ -74,6 +84,9 @@ namespace Codeflows.Csharp.Quality.Workers
 
                 return new Response(codeFlowIssues);
             }
+
+            private bool IsNotBlacklistedIssue(Issue issue) =>
+                !blacklistedIssueMessages.Any(issue.Message.StartsWith);
         }
     }
 }

@@ -3,26 +3,43 @@
 @{
     ViewData["Title"] = "Refactor Run Details";
     bool shouldRefresh = Model.RefactorRun.State == "Scheduled" || Model.RefactorRun.State == "Running";
+    string cardPlateClass = Model.RefactorRun.State switch
+    {
+        "Failure" => "error-plate",
+        "Success" => "success-plate",
+        _ => "info-plate"
+    };
+
+    string botImage = Model.RefactorRun.State switch
+    {
+        "Failure" => "bot-failed.jpg",
+        "Success" => "bot-success.jpg",
+        _ => "bot-in-progress.jpg"
+    };
 }
 
 <div class="container mt-4">
-    <h2>Details of the refactor run</h2>
+    <h2>Details of run @Model.RefactorRun.Id</h2>
 
-    <div class="card mb-4">
-        <div class="card-body">
-            <h5 class="card-title">General Information</h5>
-            <p class="card-text"><strong>Run ID:</strong> @Model.RefactorRun.Id</p>
-            <p class="card-text"><strong>Workflow ID:</strong> @Model.RefactorRun.WorkflowId</p>
-            <p class="card-text"><strong>Repository URL:</strong> @Model.RefactorRun.RepositoryUrl</p>
-            <p class="card-text"><strong>State:</strong> @Model.RefactorRun.State</p>
-            @if (!string.IsNullOrEmpty(Model.RefactorRun.Note))
-            {
-                <p class="card-text"><strong>Note:</strong> @Model.RefactorRun.Note</p>
-            }
-            @if (!string.IsNullOrEmpty(Model.RefactorRun.PullRequestUrl))
-            {
-                <p class="card-text"><strong>Pull Request URL:</strong> @Model.RefactorRun.PullRequestUrl</p>
-            }
+    <div class="card mb-4 @cardPlateClass">
+        <div class="card-body d-flex align-items-center">
+            <div class="flex-grow-1 card-body-text">
+                <h5 class="card-title">General Information</h5>
+                <p class="card-text"><strong>Workflow ID:</strong> @Model.RefactorRun.WorkflowId</p>
+                <p class="card-text"><strong>Repository URL:</strong> <a target="_blank" href="@Model.RefactorRun.RepositoryUrl">@Model.RefactorRun.RepositoryUrl</a></p>
+                <p class="card-text"><strong>State:</strong> @Model.RefactorRun.State</p>
+                @if (!string.IsNullOrEmpty(Model.RefactorRun.Note))
+                {
+                    <p class="card-text"><strong>Note:</strong> @Model.RefactorRun.Note</p>
+                }
+                @if (!string.IsNullOrEmpty(Model.RefactorRun.PullRequestUrl))
+                {
+                    <p class="card-text"><strong>Pull Request URL:</strong> @Model.RefactorRun.PullRequestUrl</p>
+                }
+            </div>
+            <div>
+                <img src="/imgs/@botImage" alt="Robot Success" class="img-fluid" style="max-width: 200px;">
+            </div>
         </div>
     </div>
 

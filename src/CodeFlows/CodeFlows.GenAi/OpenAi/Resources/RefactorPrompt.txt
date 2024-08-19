@@ -11,6 +11,8 @@ You must obey the following directives the project to work:
 - Do not make changes that affect other files (such as renaming public methods or classes, removing public methods, etc), even if that is asked of you
 - Keep all existing class names unchanged regardless of any suggested modifications
 - Focus on fixing the issues that are cited to you
+- If the lines you add/modify require imports, you should add the appropriate 'using xxx' statements (for example when using 'Find' you might need to import Microsoft.EntityFrameworkCore)
+- Make sure all the required imports are present (for example when changing from throwing generic exception to InvalidOperationException, you still need to import System)
 
 This is the list of issues for the file we are working on:
 
@@ -19,3 +21,5 @@ This is the list of issues for the file we are working on:
 This is the current source code of the file:
 
 {sourcecode}
+
+Ignore issues that require renaming classes, like 'Make this class name end with 'Exception'', if you change this you will break the code!!!

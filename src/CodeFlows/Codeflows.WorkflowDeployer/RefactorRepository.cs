@@ -47,6 +47,9 @@ namespace Codeflows.WorkflowDeployer
 
         public override void BuildDefinition()
         {
+            // TODO: Check if there is already a pull request open from us, and fail immediately if so
+
+
             _builder.AddTask(
                 wf => wf.UpdateStateToRunning,
                 wf => new UpdateRefactorRun()
@@ -141,7 +144,8 @@ namespace Codeflows.WorkflowDeployer
                 wf => new UpdateRefactorRun()
                 {
                     RefactorRunId = wf.Input.RefactorRunId,
-                    State = RefactorRunState.Success
+                    State = RefactorRunState.Success,
+                    PullRequestUrl = wf.CreatePullRequest.Output.PullRequestUrl
                 }
             );
         }
