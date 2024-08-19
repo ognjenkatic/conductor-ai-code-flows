@@ -82,6 +82,7 @@ await Host.CreateDefaultBuilder(args)
         services.RegisterWorkerTask<ForkProjectDetection.Handler>();
         services.RegisterWorkerTask<ForkProjectAnalysis.Handler>();
         services.RegisterWorkerTask<CommitProjectChanges.Handler>();
+        services.RegisterWorkerTask<CheckForPullRequest.Handler>();
         services.RegisterWorkerTask<CreatePullRequest.Handler>(opts =>
         {
             opts.Description =

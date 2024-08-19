@@ -30,16 +30,30 @@ namespace Codeflows.Portal.Pages
         ];
 
         public List<RefactorRunDTO> RefactorRuns { get; set; } = [];
+        public string SelectedStatus { get; set; }
         public int CurrentPage { get; set; }
         public int TotalPages { get; set; }
         public string[] WhitelistedRepos { get; set; } = RepositoryWhitelist.WhitelistedRepos;
 
         public async Task OnGet(
             int pageNumber = 1,
-            int pageSize = 25,
+            int pageSize = 10,
+            string? statusFilter = null,
             CancellationToken cancellationToken = default
         )
         {
+            RefactorRunState? refactorRunState = null;
+
+            if (Enum.TryParse<RefactorRunState>(statusFilter, out var parsedState))
+            {
+                refactorRunState = parsedState;
+                SelectedStatus = parsedState.ToString();
+            }
+            else
+            {
+                SelectedStatus = "All";
+            }
+
             var response = new List<RefactorRunDTO>();
 
             pageNumber = Math.Max(1, pageNumber);
@@ -48,14 +62,17 @@ namespace Codeflows.Portal.Pages
             var totalCount = await _dbContext.RefactorRuns.CountAsync(cancellationToken);
 
             RefactorRuns = await _dbContext
-                .RefactorRuns.Skip((pageNumber - 1) * pageSize)
+                .RefactorRuns.OrderByDescending(rr => rr.Id)
+                .Where(rr => refactorRunState == null || rr.State == refactorRunState)
+                .Skip((pageNumber - 1) * pageSize)
                 .Take(pageSize)
                 .Select(rr => new RefactorRunDTO
                 {
                     Id = rr.Id,
                     WorkflowId = rr.WorkflowId,
                     RepositoryUrl = rr.RepositoryUrl,
-                    State = rr.State.ToString()
+                    State = rr.State.ToString(),
+                    Note = rr.Note
                 })
                 .ToListAsync(cancellationToken);
 

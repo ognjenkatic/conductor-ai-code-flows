@@ -101,7 +101,7 @@ namespace CodeFlows.Workspace.Github.Workers
 
                 logger.LogDebug("Created pull request at {pullRequestUrl}", pr.HtmlUrl);
 
-                return new() { PullRequestUrl = pr.Url };
+                return new() { PullRequestUrl = pr.HtmlUrl };
             }
         }
     }

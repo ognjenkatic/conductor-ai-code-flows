@@ -5,21 +5,37 @@
     ViewData["Title"] = "Refactor Runs";
 }
 
-<h2>@ViewData["Title"]</h2>
+<div class="d-flex justify-content-center">
+    <form method="post" asp-page-handler="SubmitUrl" style="max-width: 800px;text-align:center">
+        <div class="form-group d-flex align-items-center">
+            <div class="flex-grow-1 mr-2">
+                <select id="projectUrl" name="projectUrl" class="form-control" style="text-align:center;" required>
+                    <option value="" disabled selected>Select a project</option>
+                    @foreach (var repo in Model.WhitelistedRepos)
+                    {
+                        <option value="@repo">@repo</option>
+                    }
+                </select>
+            </div>
+            <button type="submit" class="btn btn-primary">Submit</button>
+        </div>
+    </form>
+</div>
 
-<form method="post" asp-page-handler="SubmitUrl">
-    <div class="form-group">
-        <label for="projectUrl">Project Url</label>
-        <select id="projectUrl" name="projectUrl" class="form-control" required>
-            <option value="" disabled selected>Select a project</option>
-            @foreach (var repo in Model.WhitelistedRepos)
-            {
-                <option value="@repo">@repo</option>
-            }
+<h2>@ViewData["Title"]</h2>
+<div class="d-flex justify-content-between align-items-center">
+    <form method="get" class="form-inline">
+        <label class="mr-2" for="statusFilter">Filter by Status</label>
+        <select asp-for="@Model.SelectedStatus" id="statusFilter" name="statusFilter" class="form-control mr-2" onchange="this.form.submit();">
+            <option value="">All</option>
+            <option value="Scheduled">Scheduled</option>
+            <option value="Running">Running</option>
+            <option value="Success">Success</option>
+            <option value="Failure">Failure</option>
+            <option value="Rejected">Rejected</option>
         </select>
-    </div>
-    <button type="submit" class="btn btn-primary">Submit</button>
-</form>
+    </form>
+</div>
 
 <table class="table table-striped mt-4">
     <thead>
@@ -28,6 +44,7 @@
             <th>Workflow ID</th>
             <th>Repository URL</th>
             <th>State</th>
+            <th>Note</th>
             <th>Details</th>
         </tr>
     </thead>
@@ -39,7 +56,8 @@
                 <td>@run.WorkflowId</td>
                 <td>@run.RepositoryUrl</td>
                 <td>@run.State</td>
-                <td>
+                <td style ="max-width:350px;">@run.Note</td>
+                <td >
                     <a asp-page="/Run" asp-route-runId="@run.Id" class="btn btn-info">
                         View Details
                     </a>
@@ -63,12 +81,12 @@
         }
         else
         {
-            <a asp-page="/Index" asp-route-pageNumber="@i" asp-route-pageSize="10" class="btn btn-primary">@i</a>
+            <a  asp-page="/Index" asp-route-pageNumber="@i" asp-route-pageSize="10" class="btn btn-primary">@i</a>
         }
     }
 
     @if (Model.CurrentPage < Model.TotalPages)
     {
-        <a asp-page="/Index" asp-route-pageNumber="@(Model.CurrentPage + 1)" asp-route-pageSize="10" class="btn btn-primary">Next</a>
+        <a  asp-page="/Index" asp-route-pageNumber="@(Model.CurrentPage + 1)" asp-route-pageSize="10" class="btn btn-primary">Next</a>
     }
 </div>

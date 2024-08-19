@@ -6,6 +6,7 @@
     string cardPlateClass = Model.RefactorRun.State switch
     {
         "Failure" => "error-plate",
+        "Rejected" => "error-plate",
         "Success" => "success-plate",
         _ => "info-plate"
     };
@@ -13,6 +14,7 @@
     string botImage = Model.RefactorRun.State switch
     {
         "Failure" => "bot-failed.jpg",
+        "Rejected" => "bot-failed.jpg",
         "Success" => "bot-success.jpg",
         _ => "bot-in-progress.jpg"
     };
@@ -27,15 +29,16 @@
                 <h5 class="card-title">General Information</h5>
                 <p class="card-text"><strong>Workflow ID:</strong> @Model.RefactorRun.WorkflowId</p>
                 <p class="card-text"><strong>Repository URL:</strong> <a target="_blank" href="@Model.RefactorRun.RepositoryUrl">@Model.RefactorRun.RepositoryUrl</a></p>
-                <p class="card-text"><strong>State:</strong> @Model.RefactorRun.State</p>
                 @if (!string.IsNullOrEmpty(Model.RefactorRun.Note))
                 {
                     <p class="card-text"><strong>Note:</strong> @Model.RefactorRun.Note</p>
                 }
                 @if (!string.IsNullOrEmpty(Model.RefactorRun.PullRequestUrl))
                 {
-                    <p class="card-text"><strong>Pull Request URL:</strong> @Model.RefactorRun.PullRequestUrl</p>
+                    <p class="card-text"><strong>Pull Request URL:</strong> <a target="_blank" href="@Model.RefactorRun.PullRequestUrl">@Model.RefactorRun.PullRequestUrl</a></p>
                 }
+                <p class="card-text"><strong>State:</strong> @Model.RefactorRun.State</p>
+
             </div>
             <div>
                 <img src="/imgs/@botImage" alt="Robot Success" class="img-fluid" style="max-width: 200px;">

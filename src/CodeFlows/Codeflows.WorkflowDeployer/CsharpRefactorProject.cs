@@ -68,10 +68,12 @@ namespace Codeflows.WorkflowDeployer
                 }
             );
 
-            _builder.AddTask(
-                wf => wf.TestBuild,
-                wf => new TestBuild { ProjectFilePath = wf.Input.RepositoryPath }
-            );
+            // TODO: Reintroduce this once we actually have time
+            // Without this we might make pull requests that make code unbuildable!
+            //_builder.AddTask(
+            //    wf => wf.TestBuild,
+            //    wf => new TestBuild { ProjectFilePath = wf.Input.RepositoryPath }
+            //);
         }
     }
 }

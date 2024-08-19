@@ -43,7 +43,10 @@ namespace Codeflows.WorkflowDeployer
         public required CreatePullRequest.Handler CreatePullRequest { get; set; }
         public required Cleanup.Handler Cleanup { get; set; }
         public required UpdateRefactorRun.Handler UpdateStateToCompleted { get; set; }
+        public required UpdateRefactorRun.Handler UpdateStateToRejected { get; set; }
         public required UpdateRefactorRun.Handler UpdateStateToRunning { get; set; }
+        public required SwitchTaskModel OpenPullRequestsSwitch { get; set; }
+        public required CheckForPullRequest.Handler CheckForOpenPullRequests { get; set; }
 
         public override void BuildDefinition()
         {
@@ -69,84 +72,120 @@ namespace Codeflows.WorkflowDeployer
             );
 
             _builder.AddTask(
-                wf => wf.PrepareForkDetectProjects,
-                wf => new ForkProjectDetection
+                wf => wf.CheckForOpenPullRequests,
+                wf => new CheckForPullRequest()
                 {
-                    RepositoryPath = wf.CloneRepository.Output.RepositoryPath
+                    RepositoryName = wf.CloneRepository.Output.RepositoryName,
+                    RepositoryOwner = wf.CloneRepository.Output.RepositoryOwner
                 }
             );
 
             _builder.AddTask(
-                wf => wf.ForkDetectProjects,
+                wf => wf.OpenPullRequestsSwitch,
                 wf =>
                     new()
                     {
-                        DynamicTasks = wf.PrepareForkDetectProjects.Output.Tasks,
-                        DynamicTasksI = wf.PrepareForkDetectProjects.Output.TaskInputs
-                    }
-            );
-
-            _builder.AddTask(
-                wf => wf.PrepareForkAnalysis,
-                wf => new ForkProjectAnalysis
+                        SwitchCaseValue = wf.CheckForOpenPullRequests.Output.HasOpenPullRequests
+                    },
+                new()
                 {
-                    DetectionForkJoinResults =
-                        (Dictionary<string, ProjectDetectionTaskOutput>)
-                            (object)"${JOIN_fork_detect_projects.output}",
-                    RepositoryName = wf.CloneRepository.Output.RepositoryName,
-                    RepositoryPath = wf.CloneRepository.Output.RepositoryPath
-                }
-            );
-
-            _builder.AddTask(
-                wf => wf.ForkAnalysis,
-                wf =>
-                    new()
+                    ["true"] = builder =>
                     {
-                        DynamicTasks = wf.PrepareForkAnalysis.Output.Tasks,
-                        DynamicTasksI = wf.PrepareForkAnalysis.Output.WorkflowInputs
+                        builder.AddTask(
+                            wf => wf.UpdateStateToRejected,
+                            wf => new UpdateRefactorRun()
+                            {
+                                RefactorRunId = wf.Input.RefactorRunId,
+                                State = RefactorRunState.Rejected,
+                                Note = "Run rejected as there is already an open pull request"
+                            }
+                        );
+                    },
+                    DefaultCase = builder =>
+                    {
+                        builder.AddTask(
+                            wf => wf.PrepareForkDetectProjects,
+                            wf => new ForkProjectDetection
+                            {
+                                RepositoryPath = wf.CloneRepository.Output.RepositoryPath
+                            }
+                        );
+
+                        builder.AddTask(
+                            wf => wf.ForkDetectProjects,
+                            wf =>
+                                new()
+                                {
+                                    DynamicTasks = wf.PrepareForkDetectProjects.Output.Tasks,
+                                    DynamicTasksI = wf.PrepareForkDetectProjects.Output.TaskInputs
+                                }
+                        );
+
+                        builder.AddTask(
+                            wf => wf.PrepareForkAnalysis,
+                            wf => new ForkProjectAnalysis
+                            {
+                                DetectionForkJoinResults =
+                                    (Dictionary<string, ProjectDetectionTaskOutput>)
+                                        (object)"${JOIN_fork_detect_projects.output}",
+                                RepositoryName = wf.CloneRepository.Output.RepositoryName,
+                                RepositoryPath = wf.CloneRepository.Output.RepositoryPath
+                            }
+                        );
+
+                        builder.AddTask(
+                            wf => wf.ForkAnalysis,
+                            wf =>
+                                new()
+                                {
+                                    DynamicTasks = wf.PrepareForkAnalysis.Output.Tasks,
+                                    DynamicTasksI = wf.PrepareForkAnalysis.Output.WorkflowInputs
+                                }
+                        );
+
+                        builder.AddTask(
+                            wf => wf.CommitChanges,
+                            wf => new CommitProjectChanges()
+                            {
+                                RepositoryPath = wf.CloneRepository.Output.RepositoryPath,
+                                CommitMessage =
+                                    "Apply code refactor suggestions through AI generated code"
+                            }
+                        );
+
+                        builder.AddTask(
+                            wf => wf.CreatePullRequest,
+                            wf => new CreatePullRequest()
+                            {
+                                RepositoryPath = wf.CloneRepository.Output.RepositoryPath,
+                                OriginalOwner = wf.CloneRepository.Output.RepositoryOwner,
+                                RepositoryOwner = wf.CloneRepository.Output.RepositoryOwner,
+                                RepositoryName = wf.CloneRepository.Output.RepositoryName,
+                                BranchName = wf.CloneRepository.Output.BranchName,
+                                PullRequestDescription =
+                                    "# Pull Request: AI-Driven Code Quality Improvements\r\n\r\n## Overview\r\n\r\nThis pull request includes code changes that have been automatically generated by AI agents. The AI agents followed well-known code quality rules and metrics to enhance the overall codebase. These improvements are aimed at making the code cleaner, more maintainable, and adhering to best practices.\r\n",
+                                PullRequestTitle = "Refactor using AI",
+                                BaseRef = wf.CloneRepository.Output.DefaultBranch,
+                                AreThereAnyChanges = wf.CommitChanges.Output.AreThereAnyChanges
+                            }
+                        );
+
+                        builder.AddTask(
+                            wf => wf.UpdateStateToCompleted,
+                            wf => new UpdateRefactorRun()
+                            {
+                                RefactorRunId = wf.Input.RefactorRunId,
+                                State = RefactorRunState.Success,
+                                PullRequestUrl = wf.CreatePullRequest.Output.PullRequestUrl
+                            }
+                        );
                     }
-            );
-
-            _builder.AddTask(
-                wf => wf.CommitChanges,
-                wf => new CommitProjectChanges()
-                {
-                    RepositoryPath = wf.CloneRepository.Output.RepositoryPath,
-                    CommitMessage = "Apply code refactor suggestions through AI generated code"
-                }
-            );
-
-            _builder.AddTask(
-                wf => wf.CreatePullRequest,
-                wf => new CreatePullRequest()
-                {
-                    RepositoryPath = wf.CloneRepository.Output.RepositoryPath,
-                    OriginalOwner = wf.CloneRepository.Output.RepositoryOwner,
-                    RepositoryOwner = wf.CloneRepository.Output.RepositoryOwner,
-                    RepositoryName = wf.CloneRepository.Output.RepositoryName,
-                    BranchName = wf.CloneRepository.Output.BranchName,
-                    PullRequestDescription =
-                        "# Pull Request: AI-Driven Code Quality Improvements\r\n\r\n## Overview\r\n\r\nThis pull request includes code changes that have been automatically generated by AI agents. The AI agents followed well-known code quality rules and metrics to enhance the overall codebase. These improvements are aimed at making the code cleaner, more maintainable, and adhering to best practices.\r\n",
-                    PullRequestTitle = "Refactor using AI",
-                    BaseRef = wf.CloneRepository.Output.DefaultBranch,
-                    AreThereAnyChanges = wf.CommitChanges.Output.AreThereAnyChanges
                 }
             );
 
             _builder.AddTask(
                 wf => wf.Cleanup,
                 wf => new Cleanup() { RepositoryPath = wf.CloneRepository.Output.RepositoryPath }
-            );
-
-            _builder.AddTask(
-                wf => wf.UpdateStateToCompleted,
-                wf => new UpdateRefactorRun()
-                {
-                    RefactorRunId = wf.Input.RefactorRunId,
-                    State = RefactorRunState.Success,
-                    PullRequestUrl = wf.CreatePullRequest.Output.PullRequestUrl
-                }
             );
         }
     }
