@@ -15,13 +15,14 @@ namespace Codeflows.Portal.Pages
         ILogger<IndexModel> logger,
         CodeflowsDbContext dbContext,
         RepositoryWhitelist repositoryWhitelist,
-        IWorkflowService workflowService
+        IWorkflowService workflowService,
+        RepositoryWhitelist repoWhitelist
     ) : PageModel
     {
         private readonly ILogger<IndexModel> _logger = logger;
         private readonly CodeflowsDbContext _dbContext = dbContext;
         private readonly RepositoryWhitelist repositoryWhitelist = repositoryWhitelist;
-
+        private readonly RepositoryWhitelist repoWhitelist = repoWhitelist;
         private static readonly RefactorRunState[] terminalStates =
         [
             RefactorRunState.Rejected,
@@ -33,7 +34,7 @@ namespace Codeflows.Portal.Pages
         public string SelectedStatus { get; set; }
         public int CurrentPage { get; set; }
         public int TotalPages { get; set; }
-        public string[] WhitelistedRepos { get; set; } = RepositoryWhitelist.WhitelistedRepos;
+        public string[] WhitelistedRepos { get; set; } = repoWhitelist.WhitelistedRepos;
 
         public async Task OnGet(
             int pageNumber = 1,

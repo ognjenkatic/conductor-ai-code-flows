@@ -33,9 +33,12 @@ builder
 
 builder.Services.RegisterWorkerTask<UpdateRefactorRun.Handler>();
 
-builder.Services.AddSingleton<RepositoryWhitelist>();
-builder.Services.AddScoped<RefactorRunService>();
+var whitelistedProjects =
+    builder.Configuration.GetSection("Repo:Whitelist").Get<string[]>()
+    ?? throw new InvalidOperationException("Repo:Whitelist configuration value not set.");
 
+builder.Services.AddScoped<RefactorRunService>();
+builder.Services.AddSingleton(new RepositoryWhitelist(whitelistedProjects));
 builder.Services.AddDbContext<CodeflowsDbContext>(options =>
 {
     var connectionString =
