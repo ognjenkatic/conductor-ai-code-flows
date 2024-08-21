@@ -14,7 +14,9 @@
     <ProjectReference Include="..\Codeflows.Portal\Codeflows.Portal.csproj" />
     <ProjectReference Include="..\CodeFlows.Workspace\CodeFlows.Workspace.csproj" />
   </ItemGroup>
-
+	<PropertyGroup>
+		<ErrorOnDuplicatePublishOutputFiles>false</ErrorOnDuplicatePublishOutputFiles>
+	</PropertyGroup>
   <ItemGroup>
 		<PackageReference Include="ConductorSharp.Engine" Version="3.0.1-beta9" />
 		<PackageReference Include="Microsoft.Extensions.Hosting" Version="8.0.0" />

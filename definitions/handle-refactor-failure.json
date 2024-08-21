@@ -1,0 +1,42 @@
+{
+  "updateTime": 1724099511188,
+  "accessPolicy": {},
+  "name": "handle_refactor_failure",
+  "version": 1,
+  "tasks": [
+    {
+      "name": "gh_cleanup",
+      "taskReferenceName": "cleanup",
+      "inputParameters": {
+        "repository_path": "${workflow.input.repository_path}"
+      },
+      "type": "SIMPLE",
+      "startDelay": 0,
+      "optional": false,
+      "asyncComplete": false,
+      "permissive": false
+    },
+    {
+      "name": "rr_update_run",
+      "taskReferenceName": "update_state_to_failed",
+      "inputParameters": {
+        "refactor_run_id": "${workflow.input.refactor_run_id}",
+        "state": "Failure"
+      },
+      "type": "SIMPLE",
+      "startDelay": 0,
+      "optional": false,
+      "asyncComplete": false,
+      "permissive": false
+    }
+  ],
+  "inputParameters": ["repository_path", "refactor_run_id"],
+  "outputParameters": {},
+  "schemaVersion": 2,
+  "restartable": true,
+  "workflowStatusListenerEnabled": false,
+  "timeoutPolicy": "ALERT_ONLY",
+  "timeoutSeconds": 0,
+  "variables": {},
+  "inputTemplate": {}
+}

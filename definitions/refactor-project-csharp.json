@@ -1,0 +1,68 @@
+{
+  "updateTime": 1724099511181,
+  "accessPolicy": {},
+  "name": "refactor_project_csharp",
+  "version": 1,
+  "tasks": [
+    {
+      "name": "cq_init_metrics_project",
+      "taskReferenceName": "init_metrics_project",
+      "inputParameters": {
+        "project_id": "${workflow.input.repository_name}"
+      },
+      "type": "SIMPLE",
+      "startDelay": 0,
+      "optional": false,
+      "asyncComplete": false,
+      "permissive": false
+    },
+    {
+      "name": "cq_analyse",
+      "taskReferenceName": "analyse_code",
+      "inputParameters": {
+        "project_id": "${workflow.input.repository_name}",
+        "project_file_path": "${workflow.input.project_path}"
+      },
+      "type": "SIMPLE",
+      "startDelay": 0,
+      "optional": false,
+      "asyncComplete": false,
+      "permissive": false
+    },
+    {
+      "name": "cq_get_metrics",
+      "taskReferenceName": "get_metrics",
+      "inputParameters": {
+        "project_id": "${workflow.input.repository_name}"
+      },
+      "type": "SIMPLE",
+      "startDelay": 0,
+      "optional": false,
+      "asyncComplete": false,
+      "permissive": false
+    },
+    {
+      "name": "ai_refactor_project",
+      "taskReferenceName": "refactor_project",
+      "inputParameters": {
+        "project_file_path": "${workflow.input.project_path}",
+        "maximum_parallel_prompts": 10,
+        "issues_by_file": "${get_metrics.output.issues_by_file}"
+      },
+      "type": "SIMPLE",
+      "startDelay": 0,
+      "optional": false,
+      "asyncComplete": false,
+      "permissive": false
+    }
+  ],
+  "inputParameters": ["repository_path", "repository_name", "project_path"],
+  "outputParameters": {},
+  "schemaVersion": 2,
+  "restartable": true,
+  "workflowStatusListenerEnabled": false,
+  "timeoutPolicy": "ALERT_ONLY",
+  "timeoutSeconds": 0,
+  "variables": {},
+  "inputTemplate": {}
+}

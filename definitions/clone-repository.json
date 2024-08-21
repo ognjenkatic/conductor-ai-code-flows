@@ -1,0 +1,226 @@
+{
+  "updateTime": 1724099511170,
+  "accessPolicy": {},
+  "name": "refactor_repository",
+  "version": 1,
+  "tasks": [
+    {
+      "name": "rr_update_run",
+      "taskReferenceName": "update_state_to_running",
+      "inputParameters": {
+        "refactor_run_id": "${workflow.input.refactor_run_id}",
+        "state": "Running"
+      },
+      "type": "SIMPLE",
+      "startDelay": 0,
+      "optional": false,
+      "asyncComplete": false,
+      "permissive": false
+    },
+    {
+      "name": "gh_clone_repo",
+      "taskReferenceName": "clone_repository",
+      "inputParameters": {
+        "repository_url": "${workflow.input.repository_url}",
+        "repository_path": "${workflow.input.repository_path}"
+      },
+      "type": "SIMPLE",
+      "startDelay": 0,
+      "optional": false,
+      "asyncComplete": false,
+      "permissive": false
+    },
+    {
+      "name": "gh_check_for_prs",
+      "taskReferenceName": "check_for_open_pull_requests",
+      "inputParameters": {
+        "repository_name": "${clone_repository.output.repository_name}",
+        "repository_owner": "${clone_repository.output.repository_owner}"
+      },
+      "type": "SIMPLE",
+      "startDelay": 0,
+      "optional": false,
+      "asyncComplete": false,
+      "permissive": false
+    },
+    {
+      "name": "SWITCH_open_pull_requests_switch",
+      "taskReferenceName": "open_pull_requests_switch",
+      "inputParameters": {
+        "switch_case_value": "${check_for_open_pull_requests.output.has_open_pull_requests}"
+      },
+      "type": "SWITCH",
+      "decisionCases": {
+        "true": [
+          {
+            "name": "rr_update_run",
+            "taskReferenceName": "update_state_to_rejected",
+            "inputParameters": {
+              "refactor_run_id": "${workflow.input.refactor_run_id}",
+              "state": "Rejected",
+              "note": "Run rejected as there is already an open pull request"
+            },
+            "type": "SIMPLE",
+            "startDelay": 0,
+            "optional": false,
+            "asyncComplete": false,
+            "permissive": false
+          }
+        ]
+      },
+      "defaultCase": [
+        {
+          "name": "fork_project_detection",
+          "taskReferenceName": "prepare_fork_detect_projects",
+          "inputParameters": {
+            "repository_path": "${clone_repository.output.repository_path}"
+          },
+          "type": "SIMPLE",
+          "startDelay": 0,
+          "optional": false,
+          "asyncComplete": false,
+          "permissive": false
+        },
+        {
+          "name": "FORK_JOIN_DYNAMIC_fork_detect_projects",
+          "taskReferenceName": "FORK_JOIN_DYNAMIC_fork_detect_projects",
+          "inputParameters": {
+            "dynamic_tasks": "${prepare_fork_detect_projects.output.tasks}",
+            "dynamic_tasks_i": "${prepare_fork_detect_projects.output.task_inputs}"
+          },
+          "type": "FORK_JOIN_DYNAMIC",
+          "dynamicForkTasksParam": "dynamic_tasks",
+          "dynamicForkTasksInputParamName": "dynamic_tasks_i",
+          "startDelay": 0,
+          "optional": false,
+          "asyncComplete": false,
+          "permissive": false
+        },
+        {
+          "name": "JOIN_fork_detect_projects",
+          "taskReferenceName": "JOIN_fork_detect_projects",
+          "inputParameters": {},
+          "type": "JOIN",
+          "startDelay": 0,
+          "optional": false,
+          "asyncComplete": false,
+          "permissive": false
+        },
+        {
+          "name": "fork_project_analysis",
+          "taskReferenceName": "prepare_fork_analysis",
+          "inputParameters": {
+            "detection_fork_join_results": "${JOIN_fork_detect_projects.output}",
+            "repository_name": "${clone_repository.output.repository_name}",
+            "repository_path": "${clone_repository.output.repository_path}"
+          },
+          "type": "SIMPLE",
+          "startDelay": 0,
+          "optional": false,
+          "asyncComplete": false,
+          "permissive": false
+        },
+        {
+          "name": "FORK_JOIN_DYNAMIC_fork_analysis",
+          "taskReferenceName": "FORK_JOIN_DYNAMIC_fork_analysis",
+          "inputParameters": {
+            "dynamic_tasks": "${prepare_fork_analysis.output.tasks}",
+            "dynamic_tasks_i": "${prepare_fork_analysis.output.workflow_inputs}"
+          },
+          "type": "FORK_JOIN_DYNAMIC",
+          "dynamicForkTasksParam": "dynamic_tasks",
+          "dynamicForkTasksInputParamName": "dynamic_tasks_i",
+          "startDelay": 0,
+          "optional": false,
+          "asyncComplete": false,
+          "permissive": false
+        },
+        {
+          "name": "JOIN_fork_analysis",
+          "taskReferenceName": "JOIN_fork_analysis",
+          "inputParameters": {},
+          "type": "JOIN",
+          "startDelay": 0,
+          "optional": false,
+          "asyncComplete": false,
+          "permissive": false
+        },
+        {
+          "name": "gh_commit_change",
+          "taskReferenceName": "commit_changes",
+          "inputParameters": {
+            "repository_path": "${clone_repository.output.repository_path}",
+            "commit_message": "Apply code refactor suggestions through AI generated code"
+          },
+          "type": "SIMPLE",
+          "startDelay": 0,
+          "optional": false,
+          "asyncComplete": false,
+          "permissive": false
+        },
+        {
+          "name": "gh_create_pr",
+          "taskReferenceName": "create_pull_request",
+          "inputParameters": {
+            "repository_path": "${clone_repository.output.repository_path}",
+            "original_owner": "${clone_repository.output.repository_owner}",
+            "repository_owner": "${clone_repository.output.repository_owner}",
+            "repository_name": "${clone_repository.output.repository_name}",
+            "branch_name": "${clone_repository.output.branch_name}",
+            "pull_request_description": "# Pull Request: AI-Driven Code Quality Improvements\r\n\r\n## Overview\r\n\r\nThis pull request includes code changes that have been automatically generated by AI agents. The AI agents followed well-known code quality rules and metrics to enhance the overall codebase. These improvements are aimed at making the code cleaner, more maintainable, and adhering to best practices.\r\n",
+            "pull_request_title": "Refactor using AI",
+            "base_ref": "${clone_repository.output.default_branch}",
+            "are_there_any_changes": "${commit_changes.output.are_there_any_changes}"
+          },
+          "type": "SIMPLE",
+          "startDelay": 0,
+          "optional": false,
+          "asyncComplete": false,
+          "permissive": false
+        },
+        {
+          "name": "rr_update_run",
+          "taskReferenceName": "update_state_to_completed",
+          "inputParameters": {
+            "refactor_run_id": "${workflow.input.refactor_run_id}",
+            "state": "Success",
+            "pull_request_url": "${create_pull_request.output.pull_request_url}"
+          },
+          "type": "SIMPLE",
+          "startDelay": 0,
+          "optional": false,
+          "asyncComplete": false,
+          "permissive": false
+        }
+      ],
+      "startDelay": 0,
+      "optional": false,
+      "asyncComplete": false,
+      "evaluatorType": "value-param",
+      "expression": "switch_case_value",
+      "permissive": false
+    },
+    {
+      "name": "gh_cleanup",
+      "taskReferenceName": "cleanup",
+      "inputParameters": {
+        "repository_path": "${clone_repository.output.repository_path}"
+      },
+      "type": "SIMPLE",
+      "startDelay": 0,
+      "optional": false,
+      "asyncComplete": false,
+      "permissive": false
+    }
+  ],
+  "inputParameters": ["repository_url", "refactor_run_id", "repository_path"],
+  "outputParameters": {},
+  "failureWorkflow": "handle_refactor_failure",
+  "schemaVersion": 2,
+  "restartable": true,
+  "workflowStatusListenerEnabled": false,
+  "timeoutPolicy": "ALERT_ONLY",
+  "timeoutSeconds": 0,
+  "variables": {},
+  "inputTemplate": {}
+}
