@@ -7,6 +7,7 @@ using ConductorSharp.Client.Service;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 using Task = System.Threading.Tasks.Task;
 
 namespace Codeflows.Portal.Pages
@@ -16,9 +17,15 @@ namespace Codeflows.Portal.Pages
         CodeflowsDbContext dbContext,
         RepositoryWhitelist repositoryWhitelist,
         IWorkflowService workflowService,
-        RepositoryWhitelist repoWhitelist
+        RepositoryWhitelist repoWhitelist,
+        IMemoryCache memoryCache
     ) : PageModel
     {
+        private readonly RateLimiter userRateLimiter =
+            new(memoryCache, 5, TimeSpan.FromMinutes(15));
+        private readonly RateLimiter globalRateLimiter =
+            new(memoryCache, 20, TimeSpan.FromHours(1));
+
         private readonly ILogger<IndexModel> _logger = logger;
         private readonly CodeflowsDbContext _dbContext = dbContext;
         private readonly RepositoryWhitelist repositoryWhitelist = repositoryWhitelist;
@@ -31,7 +38,7 @@ namespace Codeflows.Portal.Pages
         ];
 
         public List<RefactorRunDTO> RefactorRuns { get; set; } = [];
-        public string SelectedStatus { get; set; }
+        public string? SelectedStatus { get; set; }
         public int CurrentPage { get; set; }
         public int TotalPages { get; set; }
         public string[] WhitelistedRepos { get; set; } = repoWhitelist.WhitelistedRepos;
@@ -92,6 +99,24 @@ namespace Codeflows.Portal.Pages
             CancellationToken cancellationToken = default
         )
         {
+            var clientIp = HttpContext.Connection?.RemoteIpAddress?.ToString() ?? "weird-anon-user";
+
+            var userRateLimitKey = $"RateLimit-{clientIp}";
+            var globalRateLimitKey = $"GlobalRateLimit";
+
+            if (!userRateLimiter.IsRequestAllowed(userRateLimitKey))
+            {
+                TempData["ErrorMessage"] =
+                    "You have exceeded the rate limit. Please try again later.";
+                return RedirectToPage();
+            }
+            else if (!globalRateLimiter.IsRequestAllowed(globalRateLimitKey))
+            {
+                TempData["ErrorMessage"] =
+                    "Users have exceeded the rate limit. Please try again later.";
+                return RedirectToPage();
+            }
+
             var currentRepositoryRuns = _dbContext
                 .RefactorRuns.Where(r =>
                     r.RepositoryUrl == projectUrl && !terminalStates.Contains(r.State)

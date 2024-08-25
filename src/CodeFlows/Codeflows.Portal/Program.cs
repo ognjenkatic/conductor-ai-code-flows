@@ -47,6 +47,7 @@ builder.Services.AddDbContext<CodeflowsDbContext>(options =>
 
     options.UseNpgsql(connectionString);
 });
+builder.Services.AddMemoryCache();
 
 var app = builder.Build();
 
