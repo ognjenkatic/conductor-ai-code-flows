@@ -58,12 +58,19 @@ namespace Codeflows.Portal.Pages
                 PullRequestUrl = refactorRun.PullRequestUrl
             };
 
-            RefactorRunTasks = await refactorRunService.GetRefactorRunTasks(
-                refactorRun.Id,
-                cancellationToken
-            );
+            try
+            {
+                RefactorRunTasks = await refactorRunService.GetRefactorRunTasks(
+                    refactorRun.Id,
+                    cancellationToken
+                );
 
-            return Page();
+                return Page();
+            }
+            catch (Exception)
+            {
+                return RedirectToPage("Index");
+            }
         }
     }
 }
