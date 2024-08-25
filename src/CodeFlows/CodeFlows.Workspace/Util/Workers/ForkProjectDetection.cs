@@ -1,10 +1,14 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 using CodeFlows.Workspace.Common.DTOs;
 using ConductorSharp.Client.Generated;
 using ConductorSharp.Client.Service;
 using ConductorSharp.Engine;
 using ConductorSharp.Engine.Builders.Metadata;
 using MediatR;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+using System.Collections.Generic;
 
 namespace CodeFlows.Workspace.Util.Workers
 {
@@ -36,17 +40,8 @@ namespace CodeFlows.Workspace.Util.Workers
                     t.Name.StartsWith(projectDetectionTaskPrefix)
                 );
 
-                var dynamicTasks = new List<WorkflowTask>();
-                var dynamicTaskInputs = new Dictionary<string, ProjectDetectionTaskInput>();
-
-                foreach (var task in detectionTasks)
-                {
-                    dynamicTasks.Add(
-                        new WorkflowTask { Name = task.Name, TaskReferenceName = task.Name }
-                    );
-
-                    dynamicTaskInputs.Add(task.Name, new(request.RepositoryPath));
-                }
+                var dynamicTasks = detectionTasks.Select(task => new WorkflowTask { Name = task.Name, TaskReferenceName = task.Name }).ToList();
+                var dynamicTaskInputs = detectionTasks.ToDictionary(task => task.Name, task => new ProjectDetectionTaskInput(request.RepositoryPath));
 
                 return new Response(dynamicTasks, dynamicTaskInputs);
             }

@@ -1,8 +1,9 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 using System.Diagnostics;
 using ConductorSharp.Engine;
 using ConductorSharp.Engine.Builders.Metadata;
 using MediatR;
+using System;
 
 namespace Codeflows.Csharp.Quality.Workers
 {
@@ -11,7 +12,7 @@ namespace Codeflows.Csharp.Quality.Workers
         [Required]
         public required string ProjectFilePath { get; set; }
 
-        public record Response { }
+        public interface Response { }
 
         [OriginalName("csharp_test_build")]
         public partial class Handler() : TaskRequestHandler<TestBuild, Response>
@@ -21,9 +22,7 @@ namespace Codeflows.Csharp.Quality.Workers
                 CancellationToken cancellationToken
             )
             {
-                var fileInfo =
-                    new FileInfo(request.ProjectFilePath)
-                    ?? throw new InvalidOperationException("Could not locate project file");
+                var fileInfo = new FileInfo(request.ProjectFilePath);
 
                 var process = new Process
                 {

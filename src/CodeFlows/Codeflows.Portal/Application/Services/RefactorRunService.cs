@@ -1,7 +1,9 @@
-﻿using System.Threading;
+using System;
+using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
 using Codeflows.Portal.DTOs;
 using Codeflows.Portal.Infrastructure.Persistence;
-using Codeflows.Portal.Infrastructure.Persistence.Entities;
 using ConductorSharp.Client.Generated;
 using ConductorSharp.Client.Service;
 
@@ -11,10 +13,7 @@ namespace Codeflows.Portal.Application.Services
     {
         private readonly CodeflowsDbContext dbContext;
         private readonly IWorkflowService workflowService;
-        private readonly Dictionary<string, string> runStageToTaskMap = new Dictionary<
-            string,
-            string
-        >()
+        private readonly Dictionary<string, string> runStageToTaskMap = new Dictionary<string, string>()
         {
             { "clone_repository", "Clone Repository" },
             { "detect_projects_csharp", "Detect Solutions" },
@@ -31,32 +30,24 @@ namespace Codeflows.Portal.Application.Services
             this.workflowService = workflowService;
         }
 
-        public async Task<List<RefactorRunTask>> GetRefactorRunTasks(
-            int refactorRunId,
-            CancellationToken cancellationToken
-        )
+        public async Task<List<RefactorRunTask>> GetRefactorRunTasks(int refactorRunId, CancellationToken cancellationToken)
         {
-            var run =
-                await dbContext.RefactorRuns.FindAsync([refactorRunId], cancellationToken)
+            var run = await dbContext.RefactorRuns.FindAsync(new object[] { refactorRunId }, cancellationToken)
                 ?? throw new InvalidOperationException("Could not find refactor run by id");
 
             if (run.WorkflowId is null)
             {
-                return [];
+                return new List<RefactorRunTask>();
             }
 
             return await GetTasks(run.WorkflowId, cancellationToken);
         }
 
-        private async Task<List<RefactorRunTask>> GetTasks(
-            string workflowId,
-            CancellationToken cancellationToken
-        )
+        private async Task<List<RefactorRunTask>> GetTasks(string workflowId, CancellationToken cancellationToken)
         {
             var taskList = new List<RefactorRunTask>();
 
-            var workflow =
-                await workflowService.GetExecutionStatusAsync(workflowId, true, cancellationToken)
+            var workflow = await workflowService.GetExecutionStatusAsync(workflowId, true, cancellationToken)
                 ?? throw new InvalidOperationException("Could not find job by id");
 
             foreach (var task in workflow.Tasks)
@@ -65,67 +56,58 @@ namespace Codeflows.Portal.Application.Services
                 {
                     var subtasks = await GetTasks(task.SubWorkflowId, cancellationToken);
                     taskList.AddRange(subtasks);
-                    continue;
                 }
-                else if (
-                    task.WorkflowTask.Type == "SIMPLE"
-                    && runStageToTaskMap.TryGetValue(task.ReferenceTaskName, out var runTaskName)
-                )
+                else if (task.WorkflowTask.Type == "SIMPLE" && runStageToTaskMap.TryGetValue(task.ReferenceTaskName, out var runTaskName))
                 {
-                    var startTime = task.StartTime ?? 0;
-                    var endTime = task.EndTime ?? 0;
-
-                    long durationSeconds = 0;
-                    if (startTime > 0)
+                    var durationSeconds = CalculateDurationSeconds(task);
+                    taskList.Add(new RefactorRunTask
                     {
-                        if (endTime == 0)
-                        {
-                            var currentTime = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
-                            durationSeconds = (currentTime - startTime) / 1000;
-                        }
-                        else
-                        {
-                            durationSeconds = (endTime - startTime) / 1000;
-                        }
-                    }
-                    taskList.Add(
-                        new RefactorRunTask
-                        {
-                            DurationSeconds = durationSeconds,
-                            Name = runTaskName,
-                            Status = task.Status switch
-                            {
-                                ConductorSharp.Client.Generated.TaskStatus.SCHEDULED
-                                    => RefactorRunTaskState.Scheduled,
-                                ConductorSharp.Client.Generated.TaskStatus.IN_PROGRESS
-                                    => RefactorRunTaskState.InProgress,
-                                ConductorSharp.Client.Generated.TaskStatus.COMPLETED
-                                    => RefactorRunTaskState.Completed,
-                                ConductorSharp.Client.Generated.TaskStatus.FAILED
-                                    => RefactorRunTaskState.Failed,
-                                ConductorSharp.Client.Generated.TaskStatus.CANCELED
-                                    => RefactorRunTaskState.Canceled,
-                                ConductorSharp.Client.Generated.TaskStatus.SKIPPED
-                                    => RefactorRunTaskState.Skipped,
-                                ConductorSharp.Client.Generated.TaskStatus.COMPLETED_WITH_ERRORS
-                                    => RefactorRunTaskState.CompletedWithErrors,
-                                ConductorSharp.Client.Generated.TaskStatus.TIMED_OUT
-                                    => RefactorRunTaskState.TimedOut,
-                                ConductorSharp
-                                    .Client
-                                    .Generated
-                                    .TaskStatus
-                                    .FAILED_WITH_TERMINAL_ERROR
-                                    => RefactorRunTaskState.FailedWithTerminalError,
-                                _ => RefactorRunTaskState.Unknown
-                            },
-                            Description = task.WorkflowTask.TaskDefinition.Description
-                        }
-                    );
+                        DurationSeconds = durationSeconds,
+                        Name = runTaskName,
+                        Status = MapTaskStatus(task.Status),
+                        Description = task.WorkflowTask.TaskDefinition.Description
+                    });
                 }
             }
 
             return taskList;
+        }
+
+        private static long CalculateDurationSeconds(TaskResult task)
+        {
+            var startTime = task.StartTime ?? 0;
+            var endTime = task.EndTime ?? 0;
+
+            if (startTime > 0)
+            {
+                if (endTime == 0)
+                {
+                    var currentTime = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+                    return (currentTime - startTime) / 1000;
+                }
+                else
+                {
+                    return (endTime - startTime) / 1000;
+                }
+            }
+            return 0;
+        }
+
+        private static RefactorRunTaskState MapTaskStatus(ConductorSharp.Client.Generated.TaskStatus status)
+        {
+            return status switch
+            {
+                ConductorSharp.Client.Generated.TaskStatus.SCHEDULED => RefactorRunTaskState.Scheduled,
+                ConductorSharp.Client.Generated.TaskStatus.IN_PROGRESS => RefactorRunTaskState.InProgress,
+                ConductorSharp.Client.Generated.TaskStatus.COMPLETED => RefactorRunTaskState.Completed,
+                ConductorSharp.Client.Generated.TaskStatus.FAILED => RefactorRunTaskState.Failed,
+                ConductorSharp.Client.Generated.TaskStatus.CANCELED => RefactorRunTaskState.Canceled,
+                ConductorSharp.Client.Generated.TaskStatus.SKIPPED => RefactorRunTaskState.Skipped,
+                ConductorSharp.Client.Generated.TaskStatus.COMPLETED_WITH_ERRORS => RefactorRunTaskState.CompletedWithErrors,
+                ConductorSharp.Client.Generated.TaskStatus.TIMED_OUT => RefactorRunTaskState.TimedOut,
+                ConductorSharp.Client.Generated.TaskStatus.FAILED_WITH_TERMINAL_ERROR => RefactorRunTaskState.FailedWithTerminalError,
+                _ => RefactorRunTaskState.Unknown
+            };
         }
     }
 }

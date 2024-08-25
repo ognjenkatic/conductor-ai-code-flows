@@ -1,4 +1,6 @@
-﻿using System.Net.Http.Json;
+using System.Net.Http.Json;
+using System.Threading;
+using System.Threading.Tasks;
 using Codeflows.Csharp.Quality.DTOs;
 
 namespace Codeflows.Csharp.Quality.Services
@@ -58,9 +60,7 @@ namespace Codeflows.Csharp.Quality.Services
                 cancellationToken: cancellationToken
             );
 
-            var ms = response.RequestMessage?.Content?.ReadAsStringAsync();
-
-            var contnet = await response.Content.ReadAsStringAsync();
+            var content = await response.Content.ReadAsStringAsync(cancellationToken);
 
             if (!response.IsSuccessStatusCode)
             {

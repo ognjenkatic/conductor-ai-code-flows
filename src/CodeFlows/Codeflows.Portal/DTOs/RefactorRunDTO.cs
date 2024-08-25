@@ -1,6 +1,8 @@
-﻿namespace Codeflows.Portal.DTOs
+using System;
+
+namespace Codeflows.Portal.DTOs
 {
-    public class RefactorRunDTO
+    public class RefactorRunDto
     {
         public int Id { get; set; }
         public string? WorkflowId { get; set; }

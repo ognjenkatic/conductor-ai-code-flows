@@ -4,6 +4,7 @@ using Codeflows.Portal.Infrastructure.Persistence;
 using ConductorSharp.Engine.Extensions;
 using ConductorSharp.Engine.Health;
 using Microsoft.EntityFrameworkCore;
+using System;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -43,7 +44,7 @@ builder.Services.AddDbContext<CodeflowsDbContext>(options =>
 {
     var connectionString =
         builder.Configuration.GetConnectionString("Database")
-        ?? throw new Exception("Connection string not found.");
+        ?? throw new InvalidOperationException("Connection string not found.");
 
     options.UseNpgsql(connectionString);
 });
@@ -74,4 +75,4 @@ var dbContext = scope.ServiceProvider.GetRequiredService<CodeflowsDbContext>();
 await dbContext.Database.MigrateAsync();
 
 // TODO: Handle exceptions in some kind of middleware
-app.Run();
+await app.RunAsync();

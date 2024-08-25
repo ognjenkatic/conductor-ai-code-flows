@@ -1,4 +1,4 @@
-﻿using Codeflows.Portal.Application.Workers;
+using Codeflows.Portal.Application.Workers;
 using Codeflows.Portal.Infrastructure.Persistence.Entities;
 using CodeFlows.Workspace.Common.DTOs;
 using CodeFlows.Workspace.Github.Workers;
@@ -6,6 +6,7 @@ using CodeFlows.Workspace.Util.Workers;
 using ConductorSharp.Engine.Builders;
 using ConductorSharp.Engine.Builders.Metadata;
 using ConductorSharp.Engine.Model;
+using System.Collections.Generic;
 
 namespace Codeflows.WorkflowDeployer
 {
@@ -50,8 +51,14 @@ namespace Codeflows.WorkflowDeployer
 
         public override void BuildDefinition()
         {
-            // TODO: Check if there is already a pull request open from us, and fail immediately if so
-
+            _builder.AddTask(
+                wf => wf.CheckForOpenPullRequests,
+                wf => new CheckForPullRequest()
+                {
+                    RepositoryName = wf.CloneRepository.Output.RepositoryName,
+                    RepositoryOwner = wf.CloneRepository.Output.RepositoryOwner
+                }
+            );
 
             _builder.AddTask(
                 wf => wf.UpdateStateToRunning,
@@ -190,3 +197,5 @@ namespace Codeflows.WorkflowDeployer
         }
     }
 }
+
+interface HandleRefactorFailure { }

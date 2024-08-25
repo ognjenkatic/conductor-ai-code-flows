@@ -1,10 +1,11 @@
-﻿using System.Collections.Immutable;
+using System.Collections.Immutable;
 using System.ComponentModel.DataAnnotations;
 using Codeflows.Csharp.Quality.DTOs;
 using Codeflows.Csharp.Quality.Services;
 using ConductorSharp.Engine;
 using ConductorSharp.Engine.Builders.Metadata;
 using MediatR;
+using System;
 
 namespace Codeflows.Csharp.Quality.Workers
 {
@@ -86,7 +87,7 @@ namespace Codeflows.Csharp.Quality.Workers
             }
 
             private bool IsNotBlacklistedIssue(Issue issue) =>
-                !blacklistedIssueMessages.Any(issue.Message.StartsWith);
+                !Array.Exists(blacklistedIssueMessages, message => issue.Message.StartsWith(message));
         }
     }
 }

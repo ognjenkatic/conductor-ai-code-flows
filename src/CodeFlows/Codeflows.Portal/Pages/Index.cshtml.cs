@@ -7,7 +7,12 @@ using ConductorSharp.Client.Service;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
-using Task = System.Threading.Tasks.Task;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 
 namespace Codeflows.Portal.Pages
 {
@@ -15,14 +20,12 @@ namespace Codeflows.Portal.Pages
         ILogger<IndexModel> logger,
         CodeflowsDbContext dbContext,
         RepositoryWhitelist repositoryWhitelist,
-        IWorkflowService workflowService,
-        RepositoryWhitelist repoWhitelist
+        IWorkflowService workflowService
     ) : PageModel
     {
         private readonly ILogger<IndexModel> _logger = logger;
         private readonly CodeflowsDbContext _dbContext = dbContext;
         private readonly RepositoryWhitelist repositoryWhitelist = repositoryWhitelist;
-        private readonly RepositoryWhitelist repoWhitelist = repoWhitelist;
         private static readonly RefactorRunState[] terminalStates =
         [
             RefactorRunState.Rejected,
@@ -30,11 +33,11 @@ namespace Codeflows.Portal.Pages
             RefactorRunState.Failure
         ];
 
-        public List<RefactorRunDTO> RefactorRuns { get; set; } = [];
-        public string SelectedStatus { get; set; }
+        public List<RefactorRunDTO> RefactorRuns { get; set; } = new List<RefactorRunDTO>();
+        public string SelectedStatus { get; set; } = string.Empty;
         public int CurrentPage { get; set; }
         public int TotalPages { get; set; }
-        public string[] WhitelistedRepos { get; set; } = repoWhitelist.WhitelistedRepos;
+        public string[] WhitelistedRepos { get; set; } = repositoryWhitelist.WhitelistedRepos;
 
         public async Task OnGet(
             int pageNumber = 1,
@@ -54,8 +57,6 @@ namespace Codeflows.Portal.Pages
             {
                 SelectedStatus = "All";
             }
-
-            var response = new List<RefactorRunDTO>();
 
             pageNumber = Math.Max(1, pageNumber);
             pageSize = Math.Clamp(pageSize, 1, 25);
@@ -96,11 +97,11 @@ namespace Codeflows.Portal.Pages
                 return RedirectToPage();
             }
 
-            var currentRepositoryRuns = _dbContext
+            var currentRepositoryRuns = await _dbContext
                 .RefactorRuns.Where(r =>
                     r.RepositoryUrl == projectUrl && !terminalStates.Contains(r.State)
                 )
-                .FirstOrDefault();
+                .FirstOrDefaultAsync(cancellationToken);
 
             if (currentRepositoryRuns is not null)
             {
@@ -138,7 +139,7 @@ namespace Codeflows.Portal.Pages
             }
             catch (Exception ex)
             {
-                _logger.LogError("Could not start workflow due to {exception}", ex);
+                _logger.LogError("Could not start workflow due to {Exception}", ex);
                 refactorRun.State = RefactorRunState.Rejected;
                 refactorRun.Note = "Job could not be started";
                 await _dbContext.SaveChangesAsync(cancellationToken);

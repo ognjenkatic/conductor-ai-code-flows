@@ -1,4 +1,4 @@
-﻿using Codeflows.Portal.Application.Workers;
+using Codeflows.Portal.Application.Workers;
 using Codeflows.Portal.Infrastructure.Persistence.Entities;
 using CodeFlows.Workspace.Github.Workers;
 using ConductorSharp.Engine.Builders;
