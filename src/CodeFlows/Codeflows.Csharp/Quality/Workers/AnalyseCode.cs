@@ -63,7 +63,7 @@ namespace Codeflows.Csharp.Quality.Workers
                 );
 
                 // HACK: sometimes it takes a while to process the issues for the next tasks to use them
-                await Task.Delay(5000, cancellationToken);
+                await Task.Delay(20000, cancellationToken);
                 return new Response();
             }
 
