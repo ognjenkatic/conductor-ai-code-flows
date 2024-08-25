@@ -56,9 +56,7 @@ namespace CodeFlows.Workspace.Github.Workers
 
                 if (directoryInfo.Exists)
                 {
-                    throw new InvalidOperationException(
-                        $"Oops, somehow the destination directory already exists"
-                    );
+                    Directory.Delete(directoryInfo.FullName, true);
                 }
                 else
                 {
