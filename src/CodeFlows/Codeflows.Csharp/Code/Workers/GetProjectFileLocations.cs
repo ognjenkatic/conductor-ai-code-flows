@@ -1,8 +1,13 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 using Codeflows.Csharp.Common.Configuration;
 using ConductorSharp.Engine;
 using ConductorSharp.Engine.Builders.Metadata;
 using MediatR;
+using System.IO;
+using System.Linq;
+using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Codeflows.Csharp.Quality.Workers
 {
@@ -39,7 +44,7 @@ namespace Codeflows.Csharp.Quality.Workers
                             "*.sln",
                             SearchOption.AllDirectories
                         )
-                        .ToList() ?? [];
+                        .ToList();
 
                 return Task.FromResult(new Response(solutionPaths, "csharp"));
             }

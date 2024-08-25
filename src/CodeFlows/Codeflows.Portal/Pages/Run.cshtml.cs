@@ -3,6 +3,10 @@ using Codeflows.Portal.DTOs;
 using Codeflows.Portal.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using System;
+using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Codeflows.Portal.Pages
 {
@@ -19,7 +23,7 @@ namespace Codeflows.Portal.Pages
 
         public List<RefactorRunTask> RefactorRunTasks { get; set; } = new List<RefactorRunTask>();
 
-        public RefactorRunDTO RefactorRun { get; set; }
+        public RefactorRunDTO RefactorRun { get; set; } = new RefactorRunDTO();
 
         public string GetStatusBadgeClass(RefactorRunTaskState status)
         {

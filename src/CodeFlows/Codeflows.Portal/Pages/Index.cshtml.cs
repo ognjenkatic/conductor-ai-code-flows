@@ -8,7 +8,12 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
-using Task = System.Threading.Tasks.Task;
+using Microsoft.Extensions.Logging;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Codeflows.Portal.Pages
 {
@@ -17,7 +22,6 @@ namespace Codeflows.Portal.Pages
         CodeflowsDbContext dbContext,
         RepositoryWhitelist repositoryWhitelist,
         IWorkflowService workflowService,
-        RepositoryWhitelist repoWhitelist,
         IMemoryCache memoryCache
     ) : PageModel
     {
@@ -29,7 +33,6 @@ namespace Codeflows.Portal.Pages
         private readonly ILogger<IndexModel> _logger = logger;
         private readonly CodeflowsDbContext _dbContext = dbContext;
         private readonly RepositoryWhitelist repositoryWhitelist = repositoryWhitelist;
-        private readonly RepositoryWhitelist repoWhitelist = repoWhitelist;
         private static readonly RefactorRunState[] terminalStates =
         [
             RefactorRunState.Rejected,
@@ -37,11 +40,13 @@ namespace Codeflows.Portal.Pages
             RefactorRunState.Failure
         ];
 
+        private const string ErrorMessageKey = "ErrorMessage";
+
         public List<RefactorRunDTO> RefactorRuns { get; set; } = [];
         public string? SelectedStatus { get; set; }
         public int CurrentPage { get; set; }
         public int TotalPages { get; set; }
-        public string[] WhitelistedRepos { get; set; } = repoWhitelist.WhitelistedRepos;
+        public string[] WhitelistedRepos { get; set; } = repositoryWhitelist.WhitelistedRepos;
         public string? ErrorMessage { get; set; } // Property to hold the error message
 
         public async Task OnGet(
@@ -51,9 +56,9 @@ namespace Codeflows.Portal.Pages
             CancellationToken cancellationToken = default
         )
         {
-            if (TempData.ContainsKey("ErrorMessage"))
+            if (TempData.ContainsKey(ErrorMessageKey))
             {
-                ErrorMessage = TempData["ErrorMessage"] as string;
+                ErrorMessage = TempData[ErrorMessageKey] as string;
             }
 
             RefactorRunState? refactorRunState = null;
@@ -67,8 +72,6 @@ namespace Codeflows.Portal.Pages
             {
                 SelectedStatus = "All";
             }
-
-            var response = new List<RefactorRunDTO>();
 
             pageNumber = Math.Max(1, pageNumber);
             pageSize = Math.Clamp(pageSize, 1, 25);
@@ -106,32 +109,31 @@ namespace Codeflows.Portal.Pages
 
             if (!userRateLimiter.IsRequestAllowed(userRateLimitKey))
             {
-                TempData["ErrorMessage"] =
+                TempData[ErrorMessageKey] =
                     "You have exceeded the rate limit. Please try again later.";
                 return RedirectToPage();
             }
             else if (!globalRateLimiter.IsRequestAllowed(globalRateLimitKey))
             {
-                TempData["ErrorMessage"] =
+                TempData[ErrorMessageKey] =
                     "Users have exceeded the rate limit. Please try again later.";
                 return RedirectToPage();
             }
 
-            var currentRepositoryRuns = _dbContext
-                .RefactorRuns.Where(r =>
-                    r.RepositoryUrl == projectUrl && !terminalStates.Contains(r.State)
-                )
-                .FirstOrDefault();
+            var currentRepositoryRuns = await _dbContext
+                .RefactorRuns
+                .Where(r => r.RepositoryUrl == projectUrl && !terminalStates.Contains(r.State))
+                .FirstOrDefaultAsync(cancellationToken);
 
             if (currentRepositoryRuns is not null)
             {
-                TempData["ErrorMessage"] =
+                TempData[ErrorMessageKey] =
                     $"There is already a refactor job with ID {currentRepositoryRuns.Id} running for this repository.";
                 return RedirectToPage(); // Return to the same page with the error message
             }
             else if (!repositoryWhitelist.IsRepositoryWhitelisted(projectUrl))
             {
-                TempData["ErrorMessage"] = $"The repository is not whitelisted";
+                TempData[ErrorMessageKey] = $"The repository is not whitelisted";
                 return RedirectToPage(); // Return to the same page with the error message
             }
 
@@ -163,7 +165,7 @@ namespace Codeflows.Portal.Pages
             }
             catch (Exception ex)
             {
-                _logger.LogError("Could not start workflow due to {exception}", ex);
+                _logger.LogError(ex, "Could not start workflow due to {exception}");
                 refactorRun.State = RefactorRunState.Rejected;
                 refactorRun.Note = "Job could not be started";
                 await _dbContext.SaveChangesAsync(cancellationToken);

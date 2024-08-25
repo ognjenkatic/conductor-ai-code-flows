@@ -1,5 +1,11 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.IO;
+using System.Linq;
 using System.Text.RegularExpressions;
+using System.Threading;
+using System.Threading.Tasks;
 using CodeFlows.Workspace.Common.Configuration;
 using CodeFlows.Workspace.Common.Util;
 using ConductorSharp.Engine;
@@ -96,7 +102,7 @@ namespace CodeFlows.Workspace.Github.Workers
                     var remote = repo.Network.Remotes.Add("upstream", originalRepo.CloneUrl);
 
                     // Fetch the latest changes from the upstream
-                    repo.Network.Fetch(remote.Name, new string[0], new FetchOptions(), null);
+                    repo.Network.Fetch(remote.Name, Array.Empty<string>(), new FetchOptions(), null);
 
                     // Find the upstream branch to merge
                     var upstreamBranch = repo.Branches[

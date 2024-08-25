@@ -1,9 +1,12 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 using Codeflows.Portal.Infrastructure.Persistence;
 using Codeflows.Portal.Infrastructure.Persistence.Entities;
 using ConductorSharp.Engine;
 using ConductorSharp.Engine.Builders.Metadata;
 using MediatR;
+using System.Threading;
+using System.Threading.Tasks;
+using System;
 
 namespace Codeflows.Portal.Application.Workers
 {
@@ -17,13 +20,20 @@ namespace Codeflows.Portal.Application.Workers
         public string? PullRequestUrl { get; set; }
         public string? Note { get; set; }
 
-        public class Response { }
+        public class Response
+        {
+            // Add implementation here if needed or convert to an interface if appropriate
+        }
 
         [OriginalName("rr_update_run")]
-        public class Handler(CodeflowsDbContext dbContext)
-            : TaskRequestHandler<UpdateRefactorRun, Response>
+        public class Handler : TaskRequestHandler<UpdateRefactorRun, Response>
         {
-            private readonly CodeflowsDbContext dbContext = dbContext;
+            private readonly CodeflowsDbContext dbContext;
+
+            public Handler(CodeflowsDbContext dbContext)
+            {
+                this.dbContext = dbContext;
+            }
 
             public override async Task<Response> Handle(
                 UpdateRefactorRun request,
@@ -32,7 +42,7 @@ namespace Codeflows.Portal.Application.Workers
             {
                 var refactorRun =
                     await dbContext.RefactorRuns.FindAsync(
-                        [request.RefactorRunId],
+                        new object[] { request.RefactorRunId },
                         cancellationToken: cancellationToken
                     )
                     ?? throw new InvalidOperationException(
