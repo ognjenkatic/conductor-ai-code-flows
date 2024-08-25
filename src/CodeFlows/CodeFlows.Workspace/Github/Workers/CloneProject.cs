@@ -31,10 +31,13 @@ namespace CodeFlows.Workspace.Github.Workers
         );
 
         [OriginalName("gh_clone_repo")]
-        public partial class Handler(GitHubClient githubClient)
-            : TaskRequestHandler<CloneProject, Response>
+        public partial class Handler(
+            GitHubClient githubClient,
+            UsernamePasswordCredentials gitCredentials
+        ) : TaskRequestHandler<CloneProject, Response>
         {
             private readonly GitHubClient githubClient = githubClient;
+            private readonly UsernamePasswordCredentials gitCredentials = gitCredentials;
 
             public override async Task<Response> Handle(
                 CloneProject request,
@@ -64,15 +67,73 @@ namespace CodeFlows.Workspace.Github.Workers
 
                 var originalRepo = await githubClient.Repository.Get(Owner, Name);
 
-                var forkedRepo = await githubClient.Repository.Forks.Create(
-                    Owner,
-                    Name,
-                    new NewRepositoryFork()
-                );
+                // Check if the repository is already forked
+                Octokit.Repository forkedRepo;
+                try
+                {
+                    forkedRepo = await githubClient.Repository.Get(
+                        githubClient.User.Current().Result.Login,
+                        Name
+                    );
+                }
+                catch (Octokit.NotFoundException)
+                {
+                    // If not found, create a new fork
+                    forkedRepo = await githubClient.Repository.Forks.Create(
+                        Owner,
+                        Name,
+                        new NewRepositoryFork()
+                    );
+                }
 
+                // Clone the forked repository
                 Repository.Clone(forkedRepo.CloneUrl, directoryInfo.FullName);
 
                 using var repo = new LibGit2Sharp.Repository(directoryInfo.FullName);
+
+                // If the repository was already forked, sync it with the upstream repository
+                if (forkedRepo.Owner.Login != Owner)
+                {
+                    // Add the original repository as the upstream remote
+                    var remote = repo.Network.Remotes.Add("upstream", originalRepo.CloneUrl);
+
+                    // Fetch the latest changes from the upstream
+                    repo.Network.Fetch(remote.Name, new string[0], new FetchOptions(), null);
+
+                    // Find the upstream branch to merge
+                    var upstreamBranch = repo.Branches[
+                        $"refs/remotes/{remote.Name}/{originalRepo.DefaultBranch}"
+                    ];
+
+                    // Merge the upstream branch into the fork's default branch
+                    var signature = new LibGit2Sharp.Signature(
+                        "Merger",
+                        "merger@example.com",
+                        DateTimeOffset.Now
+                    );
+                    var mergeResult = repo.Merge(upstreamBranch, signature);
+
+                    if (mergeResult.Status == MergeStatus.FastForward)
+                    {
+                        // Push the changes to the forked repository
+                        var remoteOrigin = repo.Network.Remotes["origin"];
+                        var pushOptions = new PushOptions
+                        {
+                            CredentialsProvider = (url, user, cred) => gitCredentials
+                        };
+                        repo.Network.Push(
+                            remoteOrigin,
+                            @"refs/heads/" + repo.Head.FriendlyName,
+                            pushOptions
+                        );
+                    }
+                    if (mergeResult.Status == MergeStatus.Conflicts)
+                    {
+                        throw new InvalidOperationException(
+                            "Merge conflicts occurred while syncing the fork."
+                        );
+                    }
+                }
 
                 var branch = repo.CreateBranch(
                     $"autorefactor/{originalRepo.DefaultBranch}/{StringUtils.GetRandomString(10)}"

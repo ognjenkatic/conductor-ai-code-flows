@@ -34,12 +34,10 @@ await Host.CreateDefaultBuilder(args)
             configuration.GetValue<string>("GH_TOKEN")
             ?? throw new InvalidOperationException("GH_TOKEN value not set.");
 
-        services.AddSingleton(
-            new GitHubClient(new ProductHeaderValue("Codebot"))
-            {
-                Credentials = new Octokit.Credentials(ghToken)
-            }
-        );
+        services.AddScoped(ctx => new GitHubClient(new ProductHeaderValue("Codebot"))
+        {
+            Credentials = new Octokit.Credentials(ghToken)
+        });
 
         services.AddSingleton(
             new UsernamePasswordCredentials()
@@ -77,14 +75,31 @@ await Host.CreateDefaultBuilder(args)
 
         services.RegisterWorkerTask<CloneProject.Handler>(opts =>
         {
-            opts.Description = "Clones a GitHub project repository to the local workspace";
+            opts.RetryLogic = ConductorSharp.Client.Generated.TaskDefRetryLogic.FIXED;
+            opts.RetryCount = 5;
+            opts.Description =
+                "Clones a GitHub project repository to the local workspace (NOTE: There is a GitHub auth bug in this handler but for the purpose of demonstrating retries it was left in)";
         });
         services.RegisterWorkerTask<ForkProjectDetection.Handler>();
         services.RegisterWorkerTask<ForkProjectAnalysis.Handler>();
-        services.RegisterWorkerTask<CommitProjectChanges.Handler>();
-        services.RegisterWorkerTask<CheckForPullRequest.Handler>();
+        services.RegisterWorkerTask<CommitProjectChanges.Handler>(opts =>
+        {
+            opts.RetryLogic = ConductorSharp.Client.Generated.TaskDefRetryLogic.FIXED;
+            opts.RetryCount = 5;
+            opts.Description =
+                "(NOTE: There is a GitHub auth bug in this handler but for the purpose of demonstrating retries it was left in)";
+        });
+        services.RegisterWorkerTask<CheckForPullRequest.Handler>(opts =>
+        {
+            opts.RetryLogic = ConductorSharp.Client.Generated.TaskDefRetryLogic.FIXED;
+            opts.RetryCount = 5;
+            opts.Description =
+                "(NOTE: There is a GitHub auth bug in this handler but for the purpose of demonstrating retries it was left in)";
+        });
         services.RegisterWorkerTask<CreatePullRequest.Handler>(opts =>
         {
+            opts.RetryLogic = ConductorSharp.Client.Generated.TaskDefRetryLogic.FIXED;
+            opts.RetryCount = 5;
             opts.Description =
                 "Creates a pull request with code changes to the GitHub project repository";
         });
