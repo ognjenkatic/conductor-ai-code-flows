@@ -19,6 +19,12 @@
             </div>
             <button type="submit" class="btn btn-primary">Submit</button>
         </div>
+        @if (Model.ErrorMessage != null)
+        {
+            <div class="alert alert-danger mt-3">
+                @Model.ErrorMessage
+            </div>
+        }
     </form>
 </div>
 
@@ -56,8 +62,8 @@
                 <td>@run.WorkflowId</td>
                 <td>@run.RepositoryUrl</td>
                 <td>@run.State</td>
-                <td style ="max-width:350px;">@run.Note</td>
-                <td >
+                <td style="max-width:350px;">@run.Note</td>
+                <td>
                     <a asp-page="/Run" asp-route-runId="@run.Id" class="btn btn-info">
                         View Details
                     </a>
@@ -81,12 +87,12 @@
         }
         else
         {
-            <a  asp-page="/Index" asp-route-pageNumber="@i" asp-route-pageSize="10" class="btn btn-primary">@i</a>
+            <a asp-page="/Index" asp-route-pageNumber="@i" asp-route-pageSize="10" class="btn btn-primary">@i</a>
         }
     }
 
     @if (Model.CurrentPage < Model.TotalPages)
     {
-        <a  asp-page="/Index" asp-route-pageNumber="@(Model.CurrentPage + 1)" asp-route-pageSize="10" class="btn btn-primary">Next</a>
+        <a asp-page="/Index" asp-route-pageNumber="@(Model.CurrentPage + 1)" asp-route-pageSize="10" class="btn btn-primary">Next</a>
     }
 </div>

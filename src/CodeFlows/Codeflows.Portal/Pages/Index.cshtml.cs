@@ -35,6 +35,7 @@ namespace Codeflows.Portal.Pages
         public int CurrentPage { get; set; }
         public int TotalPages { get; set; }
         public string[] WhitelistedRepos { get; set; } = repoWhitelist.WhitelistedRepos;
+        public string? ErrorMessage { get; set; } // Property to hold the error message
 
         public async Task OnGet(
             int pageNumber = 1,
@@ -43,6 +44,11 @@ namespace Codeflows.Portal.Pages
             CancellationToken cancellationToken = default
         )
         {
+            if (TempData.ContainsKey("ErrorMessage"))
+            {
+                ErrorMessage = TempData["ErrorMessage"] as string;
+            }
+
             RefactorRunState? refactorRunState = null;
 
             if (Enum.TryParse<RefactorRunState>(statusFilter, out var parsedState))
@@ -86,16 +92,6 @@ namespace Codeflows.Portal.Pages
             CancellationToken cancellationToken = default
         )
         {
-            var refactorRun = new RefactorRun() { RepositoryUrl = projectUrl };
-            _dbContext.RefactorRuns.Add(refactorRun);
-
-            if (!repositoryWhitelist.IsRepositoryWhitelisted(projectUrl))
-            {
-                refactorRun.State = RefactorRunState.Rejected;
-                await _dbContext.SaveChangesAsync(cancellationToken);
-                return RedirectToPage();
-            }
-
             var currentRepositoryRuns = _dbContext
                 .RefactorRuns.Where(r =>
                     r.RepositoryUrl == projectUrl && !terminalStates.Contains(r.State)
@@ -104,14 +100,18 @@ namespace Codeflows.Portal.Pages
 
             if (currentRepositoryRuns is not null)
             {
-                refactorRun.State = RefactorRunState.Rejected;
-                refactorRun.Note =
-                    $"There is a refactor job with id {currentRepositoryRuns.Id} already running for this repository";
-                await _dbContext.SaveChangesAsync(cancellationToken);
-                throw new InvalidOperationException(
-                    "There is a refactor job already running for this repository"
-                );
+                TempData["ErrorMessage"] =
+                    $"There is already a refactor job with ID {currentRepositoryRuns.Id} running for this repository.";
+                return RedirectToPage(); // Return to the same page with the error message
             }
+            else if (!repositoryWhitelist.IsRepositoryWhitelisted(projectUrl))
+            {
+                TempData["ErrorMessage"] = $"The repository is not whitelisted";
+                return RedirectToPage(); // Return to the same page with the error message
+            }
+
+            var refactorRun = new RefactorRun() { RepositoryUrl = projectUrl };
+            _dbContext.RefactorRuns.Add(refactorRun);
 
             refactorRun.State = RefactorRunState.Scheduled;
 
