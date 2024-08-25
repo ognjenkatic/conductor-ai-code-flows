@@ -1,4 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 using CodeFlows.Workspace.Common.Configuration;
 using ConductorSharp.Engine;
 using ConductorSharp.Engine.Builders.Metadata;
@@ -6,6 +6,10 @@ using LibGit2Sharp;
 using MediatR;
 using Microsoft.Extensions.Logging;
 using Octokit;
+using System;
+using System.IO;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace CodeFlows.Workspace.Github.Workers
 {
@@ -99,7 +103,7 @@ namespace CodeFlows.Workspace.Github.Workers
                     pullRequest
                 );
 
-                logger.LogDebug("Created pull request at {pullRequestUrl}", pr.HtmlUrl);
+                logger.LogDebug("Created pull request at {PullRequestUrl}", pr.HtmlUrl);
 
                 return new() { PullRequestUrl = pr.HtmlUrl };
             }

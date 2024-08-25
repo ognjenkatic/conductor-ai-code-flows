@@ -1,10 +1,15 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 using CodeFlows.Workspace.Common.DTOs;
 using ConductorSharp.Client.Generated;
 using ConductorSharp.Client.Service;
 using ConductorSharp.Engine;
 using ConductorSharp.Engine.Builders.Metadata;
 using MediatR;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+using System;
 
 namespace CodeFlows.Workspace.Util.Workers
 {
@@ -53,11 +58,11 @@ namespace CodeFlows.Workspace.Util.Workers
                 var dynamicTaskInputs = new Dictionary<string, RefactorProjectWorkflowInput>();
                 var workflowIndex = 0;
 
-                foreach (var detectedProject in request.DetectionForkJoinResults)
+                foreach (var detectedProject in request.DetectionForkJoinResults.Select(detectedProject => detectedProject.Value))
                 {
                     if (
                         !refactorProjectWorkflows.TryGetValue(
-                            detectedProject.Value.ProjectType,
+                            detectedProject.ProjectType,
                             out var workflowDefinition
                         )
                     )
@@ -67,7 +72,7 @@ namespace CodeFlows.Workspace.Util.Workers
                         );
                     }
 
-                    foreach (var projectPath in detectedProject.Value.ProjectFilePaths)
+                    foreach (var projectPath in detectedProject.ProjectFilePaths)
                     {
                         var referenceName = $"{workflowDefinition.Name}_{workflowIndex++}";
 

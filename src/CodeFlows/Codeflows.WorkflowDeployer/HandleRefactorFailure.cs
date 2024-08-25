@@ -1,4 +1,4 @@
-﻿using Codeflows.Portal.Application.Workers;
+using Codeflows.Portal.Application.Workers;
 using Codeflows.Portal.Infrastructure.Persistence.Entities;
 using CodeFlows.Workspace.Github.Workers;
 using ConductorSharp.Engine.Builders;
@@ -27,7 +27,10 @@ namespace Codeflows.WorkflowDeployer
             public required int RefactorRunId { get; set; }
         }
 
-        public class HandleRefactorFailureOutput : WorkflowOutput { }
+        public class HandleRefactorFailureOutput : WorkflowOutput 
+        {
+            // Implementation or properties can be added here if needed in the future.
+        }
 
         public required Cleanup.Handler Cleanup { get; set; }
         public required UpdateRefactorRun.Handler UpdateStateToFailed { get; set; }
