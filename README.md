@@ -1,4 +1,5 @@
 This project is a [hackathon entry](https://buildtheflow.devfolio.co/).
+This project utilizes a neat little [open source conductor client library](https://github.com/codaxy/conductor-sharp) for polling tasks, registering workers, creating workflow definitions.
 
 Description copied from hackathon entry:
 
