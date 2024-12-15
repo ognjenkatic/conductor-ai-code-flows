@@ -1,4 +1,4 @@
-﻿using System.Text.Json.Serialization;
+using System.Text.Json.Serialization;
 
 namespace Codeflows.Csharp.Quality.DTOs
 {
@@ -48,12 +48,6 @@ namespace Codeflows.Csharp.Quality.DTOs
 
         [JsonPropertyName("tags")]
         public List<string> Tags { get; set; } = [];
-
-        //[JsonPropertyName("creationDate")]
-        //public DateTimeOffset CreationDate { get; set; }
-
-        //[JsonPropertyName("updateDate")]
-        //public DateTimeOffset UpdateDate { get; set; }
 
         [JsonPropertyName("type")]
         public required string Type { get; set; }

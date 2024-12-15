@@ -1,8 +1,11 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 using CodeFlows.Workspace.Common.Configuration;
 using ConductorSharp.Engine;
 using ConductorSharp.Engine.Builders.Metadata;
 using MediatR;
+using System.IO;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace CodeFlows.Workspace.Github.Workers
 {
@@ -11,7 +14,7 @@ namespace CodeFlows.Workspace.Github.Workers
         [Required]
         public required string RepositoryPath { get; set; }
 
-        public record Response();
+        public interface Response { }
 
         [OriginalName("gh_cleanup")]
         public partial class Handler : TaskRequestHandler<Cleanup, Response>
@@ -30,8 +33,10 @@ namespace CodeFlows.Workspace.Github.Workers
                     Directory.Delete(directoryInfo.FullName, true);
                 }
 
-                return Task.FromResult(new Response());
+                return Task.FromResult<Response>(new ResponseImpl());
             }
+
+            private class ResponseImpl : Response { }
         }
     }
 }

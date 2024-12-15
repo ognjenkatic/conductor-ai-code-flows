@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -26,7 +26,5 @@ namespace Codeflows.Csharp.Quality.DTOs
 
         [JsonPropertyName("managed")]
         public required bool Managed { get; set; }
-        //[JsonPropertyName("lastAnalysisDate")]
-        //public required DateTimeOffset LastAnalysisDate { get; set; }
     }
 }

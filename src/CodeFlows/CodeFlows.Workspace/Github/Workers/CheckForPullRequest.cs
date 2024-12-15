@@ -1,4 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 using CodeFlows.Workspace.Common.Configuration;
 using ConductorSharp.Engine;
 using ConductorSharp.Engine.Builders.Metadata;
@@ -25,14 +25,10 @@ namespace CodeFlows.Workspace.Github.Workers
 
         [OriginalName("gh_check_for_prs")]
         public class Handler(
-            UsernamePasswordCredentials gitCredentials,
-            GitHubClient githubClient,
-            ILogger<CheckForPullRequest.Handler> logger
+            GitHubClient githubClient
         ) : TaskRequestHandler<CheckForPullRequest, Response>
         {
-            private readonly UsernamePasswordCredentials gitCredentials = gitCredentials;
             private readonly GitHubClient githubClient = githubClient;
-            private readonly ILogger<Handler> logger = logger;
 
             public override async Task<Response> Handle(
                 CheckForPullRequest request,

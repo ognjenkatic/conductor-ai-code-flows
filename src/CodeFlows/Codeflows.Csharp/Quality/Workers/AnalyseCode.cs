@@ -1,10 +1,11 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 using System.Diagnostics;
 using Codeflows.Csharp.Common.Configuration;
 using Codeflows.Csharp.Quality.DTOs;
 using ConductorSharp.Engine;
 using ConductorSharp.Engine.Builders.Metadata;
 using MediatR;
+using System;
 
 namespace Codeflows.Csharp.Quality.Workers
 {
@@ -17,15 +18,16 @@ namespace Codeflows.Csharp.Quality.Workers
         [Required]
         public required string ProjectId { get; set; }
 
-        public record Response { }
+        public interface IResponse { }
 
         [OriginalName("cq_analyse")]
         public class Handler(SonarqubeConfiguration sonarqubeConfiguration)
-            : TaskRequestHandler<AnalyseCode, Response>
+            : TaskRequestHandler<AnalyseCode, IResponse>
         {
             private readonly SonarqubeConfiguration sonarqubeConfiguration = sonarqubeConfiguration;
+            private const string DotnetCommand = "dotnet";
 
-            public override async Task<Response> Handle(
+            public override async Task<IResponse> Handle(
                 AnalyseCode request,
                 CancellationToken cancellationToken
             )
@@ -35,28 +37,28 @@ namespace Codeflows.Csharp.Quality.Workers
                 var projectFileInfo = new FileInfo(request.ProjectFilePath);
 
                 await RunCommand(
-                    "dotnet",
+                    DotnetCommand,
                     $"build {projectFileInfo.Name}",
                     projectFileInfo.Directory!.FullName,
                     cancellationToken
                 );
 
                 await RunCommand(
-                    "dotnet",
+                    DotnetCommand,
                     $"sonarscanner begin /k:\"{request.ProjectId}\" /d:sonar.host.url=\"{sonarqubeConfiguration.BaseUrl}\"  /d:sonar.token=\"{sonarqubeConfiguration.Token}\"",
                     projectFileInfo.Directory!.FullName,
                     cancellationToken
                 );
 
                 await RunCommand(
-                    "dotnet",
+                    DotnetCommand,
                     $"build {projectFileInfo.Name}",
                     projectFileInfo.Directory!.FullName,
                     cancellationToken
                 );
 
                 await RunCommand(
-                    "dotnet",
+                    DotnetCommand,
                     $"dotnet sonarscanner end /d:sonar.token=\"{sonarqubeConfiguration.Token}\"",
                     projectFileInfo.Directory!.FullName,
                     cancellationToken

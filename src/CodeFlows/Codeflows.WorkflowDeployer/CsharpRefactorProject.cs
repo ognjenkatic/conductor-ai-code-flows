@@ -1,7 +1,8 @@
-﻿using Codeflows.Csharp.Quality.Workers;
+using Codeflows.Csharp.Quality.Workers;
 using CodeFlows.GenAi.OpenAi.Workers;
 using ConductorSharp.Engine.Builders;
 using ConductorSharp.Engine.Builders.Metadata;
+using System.Collections.Generic;
 
 namespace Codeflows.WorkflowDeployer
 {
@@ -68,12 +69,10 @@ namespace Codeflows.WorkflowDeployer
                 }
             );
 
-            // TODO: Reintroduce this once we actually have time
-            // Without this we might make pull requests that make code unbuildable!
-            //_builder.AddTask(
-            //    wf => wf.TestBuild,
-            //    wf => new TestBuild { ProjectFilePath = wf.Input.RepositoryPath }
-            //);
+            _builder.AddTask(
+                wf => wf.TestBuild,
+                wf => new TestBuild { ProjectFilePath = wf.Input.RepositoryPath }
+            );
         }
     }
 }
